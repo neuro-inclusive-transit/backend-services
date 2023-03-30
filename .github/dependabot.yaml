@@ -1,0 +1,16 @@
+# dependabot for GitHub
+# https://dependabot.com/docs/config-file/
+
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      time: "08:00"
+      timezone: "Europe/Berlin"
+    commit-message:
+      prefix: "github-actions"
+    reviewers:
+      - "finnge"
