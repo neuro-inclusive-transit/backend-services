@@ -1,6 +1,8 @@
 {
   "importMap": "./import_map.json",
   "tasks": {
-
+    "start:challenge-api": "deno run ./challenge-api/main.ts",
+    "start:disturbance-api": "deno run ./disturbance-api/main.ts",
+    "start:route-api": "deno run ./route-api/main.ts"
   }
 }

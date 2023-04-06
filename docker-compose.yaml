@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+  challenge-api:
+    image: challenge-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - service_name=challenge-api
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+
+  disturbance-api:
+    image: disturbance-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - service_name=disturbance-api
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+
+  route-api:
+    image: route-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - service_name=route-api
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
