@@ -37,3 +37,17 @@ services:
       - "3002:3002"
     environment:
       - PORT=3002
+
+  broker:
+    image: eclipse-mosquitto:2.0
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./broker/log:/mosquitto/log
+      - data:/mosquitto/data
+
+volumes:
+  data:
+    name: "mqtt-broker-data"
