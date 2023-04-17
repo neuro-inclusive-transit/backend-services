@@ -17,10 +17,26 @@ services:
       - ./import_map.json:/app/import_map.json
     networks:
       - default
+      - challenge-api
     environment:
       - PORT=3000
       - BROKER_HOST=broker
       - BROKER_PORT=1883
+      - DB_HOST=challenge-api-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+
+  challenge-api-db:
+    image: mariadb:10.11
+    ports:
+      - "3307:3306"
+    volumes:
+      - challenge-api-db:/var/lib/mysql
+    networks:
+      - challenge-api
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
 
   disturbance-api:
     image: disturbance-api
@@ -37,10 +53,26 @@ services:
       - ./import_map.json:/app/import_map.json
     networks:
       - default
+      - disturbance-api
     environment:
       - PORT=3001
       - BROKER_HOST=broker
       - BROKER_PORT=1883
+      - DB_HOST=disturbance-api-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+
+  disturbance-api-db:
+    image: mariadb:10.11
+    ports:
+      - "3308:3306"
+    volumes:
+      - disturbance-api-db:/var/lib/mysql
+    networks:
+      - disturbance-api
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
 
   route-api:
     image: route-api
@@ -57,10 +89,26 @@ services:
       - ./import_map.json:/app/import_map.json
     networks:
       - default
+      - route-api
     environment:
       - PORT=3002
       - BROKER_HOST=broker
       - BROKER_PORT=1883
+      - DB_HOST=route-api-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+
+  route-api-db:
+    image: mariadb:10.11
+    ports:
+      - "3306:3306"
+    volumes:
+      - route-api-db:/var/lib/mysql
+    networks:
+      - route-api
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
 
   broker:
     image: eclipse-mosquitto:2.0
@@ -70,11 +118,20 @@ services:
     volumes:
       - ./broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./broker/log:/mosquitto/log
-      - data:/mosquitto/data
+      - broker:/mosquitto/data
 
 volumes:
-  data:
-    name: "mqtt-broker-data"
+  broker:
+  challenge-api-db:
+  disturbance-api-db:
+  route-api-db:
 
 networks:
   default:
+    name: "default"
+  challenge-api:
+    name: "challenge-api"
+  disturbance-api:
+    name: "disturbance-api"
+  route-api:
+    name: "route-api"

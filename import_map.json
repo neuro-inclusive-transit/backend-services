@@ -1,5 +1,6 @@
 {
   "imports": {
-    "mqtt": "npm:mqtt@4.3.7"
+    "mqtt": "npm:mqtt@4.3.7",
+    "mariadb": "npm:mariadb@3.1.1"
   }
 }
