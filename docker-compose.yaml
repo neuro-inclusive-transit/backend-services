@@ -15,8 +15,12 @@ services:
       - ./challenge-api:/app/challenge-api
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
+    networks:
+      - default
     environment:
       - PORT=3000
+      - BROKER_HOST=broker
+      - BROKER_PORT=1883
 
   disturbance-api:
     image: disturbance-api
@@ -31,8 +35,12 @@ services:
       - ./disturbance-api:/app/disturbance-api
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
+    networks:
+      - default
     environment:
       - PORT=3001
+      - BROKER_HOST=broker
+      - BROKER_PORT=1883
 
   route-api:
     image: route-api
@@ -47,8 +55,12 @@ services:
       - ./route-api:/app/route-api
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
+    networks:
+      - default
     environment:
       - PORT=3002
+      - BROKER_HOST=broker
+      - BROKER_PORT=1883
 
   broker:
     image: eclipse-mosquitto:2.0
@@ -63,3 +75,6 @@ services:
 volumes:
   data:
     name: "mqtt-broker-data"
+
+networks:
+  default:

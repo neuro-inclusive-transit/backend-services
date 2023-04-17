@@ -1,12 +1,19 @@
 import mqtt from "mqtt";
 
-const client = mqtt.connect("mqtt://localhost:1883");
+const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
+const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
+
+const client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
 
 client.on("connect", () => {
-  client.subscribe("challenge");
+  client.subscribe("presence", function (err) {
+    if (!err) {
+      client.publish("presence", "Hello mqtt");
+    }
+  });
 });
 
-client.on("message", (topic, message) => {
+client.on("message", (_, message) => {
   console.log(message.toString());
 });
 
