@@ -8,11 +8,35 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - service_name=challenge-api
+        - SERVICE_NAME=challenge-api
     ports:
       - "3000:3000"
+    volumes:
+      - ./challenge-api:/app/challenge-api
+      - ./deno.json:/app/deno.json
+      - ./import_map.json:/app/import_map.json
+    networks:
+      - broker_network
+      - challenge-api
     environment:
       - PORT=3000
+      - BROKER_HOST=broker
+      - BROKER_PORT=1883
+      - DB_HOST=challenge-api-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+
+  challenge-api-db:
+    image: mariadb:10.11
+    ports:
+      - "3307:3306"
+    volumes:
+      - challenge-api-db:/var/lib/mysql
+    networks:
+      - challenge-api
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
 
   disturbance-api:
     image: disturbance-api
@@ -20,11 +44,35 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - service_name=disturbance-api
+        - SERVICE_NAME=disturbance-api
     ports:
       - "3001:3001"
+    volumes:
+      - ./disturbance-api:/app/disturbance-api
+      - ./deno.json:/app/deno.json
+      - ./import_map.json:/app/import_map.json
+    networks:
+      - broker_network
+      - disturbance-api
     environment:
       - PORT=3001
+      - BROKER_HOST=broker
+      - BROKER_PORT=1883
+      - DB_HOST=disturbance-api-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+
+  disturbance-api-db:
+    image: mariadb:10.11
+    ports:
+      - "3308:3306"
+    volumes:
+      - disturbance-api-db:/var/lib/mysql
+    networks:
+      - disturbance-api
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
 
   route-api:
     image: route-api
@@ -32,8 +80,56 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - service_name=route-api
+        - SERVICE_NAME=route-api
     ports:
       - "3002:3002"
+    volumes:
+      - ./route-api:/app/route-api
+      - ./deno.json:/app/deno.json
+      - ./import_map.json:/app/import_map.json
+    networks:
+      - broker_network
+      - route-api
     environment:
       - PORT=3002
+      - BROKER_HOST=broker
+      - BROKER_PORT=1883
+      - DB_HOST=route-api-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+
+  route-api-db:
+    image: mariadb:10.11
+    ports:
+      - "3306:3306"
+    volumes:
+      - route-api-db:/var/lib/mysql
+    networks:
+      - route-api
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+
+  broker:
+    image: eclipse-mosquitto:2.0
+    networks:
+      - broker_network
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./broker/log:/mosquitto/log
+      - broker:/mosquitto/data
+
+volumes:
+  broker:
+  challenge-api-db:
+  disturbance-api-db:
+  route-api-db:
+
+networks:
+  broker_network:
+  challenge-api:
+  disturbance-api:
+  route-api:

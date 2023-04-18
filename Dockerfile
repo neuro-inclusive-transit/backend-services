@@ -4,15 +4,13 @@ ARG SERVICE_NAME
 
 WORKDIR /app
 
-# Prefer not to run as root.
-USER deno
-
-ADD --chown=deno:deno ./deno.json .
-ADD --chown=deno:deno ./import_map.json .
-
 # copy code of service
-ADD --chown=deno:deno ./${SERVICE_NAME} .
+COPY ./${SERVICE_NAME} ./${SERVICE_NAME}
+COPY ./deno.json ./import_map.json ./
+
+ENV SERVICE_NAME=${SERVICE_NAME}
+
+RUN deno cache --unstable --import-map=import_map.json ./${SERVICE_NAME}/main.ts
 
 # run
-CMD deno run --allow-net --allow-env main.ts
-
+CMD deno run -A ./${SERVICE_NAME}/main.ts
