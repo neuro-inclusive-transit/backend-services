@@ -1,15 +1,15 @@
 import mqtt from "mqtt";
-import mariadb from "mariadb";
+import _mariadb from "mariadb";
 
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
 
-const DB_HOST = Deno.env.get("DB_HOST") || "localhost";
-const DB_PORT = Deno.env.get("DB_PORT")
+const _DB_HOST = Deno.env.get("DB_HOST") || "localhost";
+const _DB_PORT = Deno.env.get("DB_PORT")
   ? parseInt(Deno.env.get("DB_PORT")!)
   : 3306;
-const DB_USER = Deno.env.get("DB_USER") || "root";
-const DB_PASSWORD = Deno.env.get("DB_PASSWORD") || "root";
+const _DB_USER = Deno.env.get("DB_USER") || "root";
+const _DB_PASSWORD = Deno.env.get("DB_PASSWORD") || "root";
 
 const mqtt_client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
 

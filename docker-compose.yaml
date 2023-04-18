@@ -16,7 +16,7 @@ services:
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
     networks:
-      - default
+      - broker_network
       - challenge-api
     environment:
       - PORT=3000
@@ -52,7 +52,7 @@ services:
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
     networks:
-      - default
+      - broker_network
       - disturbance-api
     environment:
       - PORT=3001
@@ -88,7 +88,7 @@ services:
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
     networks:
-      - default
+      - broker_network
       - route-api
     environment:
       - PORT=3002
@@ -112,6 +112,8 @@ services:
 
   broker:
     image: eclipse-mosquitto:2.0
+    networks:
+      - broker_network
     ports:
       - "1883:1883"
       - "9001:9001"
@@ -127,11 +129,7 @@ volumes:
   route-api-db:
 
 networks:
-  default:
-    name: "default"
+  broker_network:
   challenge-api:
-    name: "challenge-api"
   disturbance-api:
-    name: "disturbance-api"
   route-api:
-    name: "route-api"
