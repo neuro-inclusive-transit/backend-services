@@ -35,7 +35,7 @@ mqtt_client.on("error", (error) => {
 const app = new Application();
 
 // Request an Here-Transit-API
-async function logData(origin, destination, arrivalTime, apiKey) {
+async function getRoute(origin, destination, arrivalTime, apiKey) {
   const response = await fetch(
     "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey +
       "&origin=" + origin + "&destination=" + destination + "&arrivalTime=" +
@@ -46,17 +46,17 @@ async function logData(origin, destination, arrivalTime, apiKey) {
 
 app.use(async (ctx) => {
   // Header aus Get-Request ablesen
-  let origin = ctx.request.headers.get("origin");
-  let destination = ctx.request.headers.get("destination");
-  let arrivalTime = ctx.request.headers.get("arrivalTime");
+  const origin = ctx.request.headers.get("origin");
+  const destination = ctx.request.headers.get("destination");
+  const arrivalTime = ctx.request.headers.get("arrivalTime");
 
-  let output = await logData(
+  const route = await getRoute(
     origin,
     destination,
     arrivalTime,
     hereTransitAPIKey,
   );
-  ctx.response.body = output;
+  ctx.response.body = route;
 });
 
 await app.listen({ port: 3002 });
