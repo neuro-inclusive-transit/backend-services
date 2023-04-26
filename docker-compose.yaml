@@ -26,6 +26,7 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=password
+    env_file: .env
 
   challenge-api-db:
     image: mariadb:10.11
@@ -62,6 +63,7 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=password
+    env_file: .env
 
   disturbance-api-db:
     image: mariadb:10.11
@@ -98,6 +100,7 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=password
+    env_file: .env
 
   route-api-db:
     image: mariadb:10.11
