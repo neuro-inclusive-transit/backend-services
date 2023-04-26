@@ -4,7 +4,7 @@
 
 im Rahmen des Moduls
 
-Projekt 2\
+**Projekt 2**\
 im Medieninformatik Master\
 Schwerpunkt Human-Computer Interaction\
 Technische Hochschule Köln\
@@ -24,13 +24,13 @@ Each Service has a runtime of Deno. They all share the same deno.json and
 import_map.json files, which are loaded into the container at runtime. The
 following ports are used:
 
-- ChallengeAPI: 3000
-- ChallengeAPI-Database: 3307
-- DisturbanceAPI: 3001
-- DisturbanceAPI-Database: 3308
-- RouteAPI: 3002
-- RouteAPI-Database: 3306
-- MQTT-Broker: 1883
+- ChallengeAPI: `3000`
+- ChallengeAPI-Database: `3307`
+- DisturbanceAPI: `3001`
+- DisturbanceAPI-Database: `3308`
+- RouteAPI: `3002`
+- RouteAPI-Database: `3306`
+- MQTT-Broker: `1883`
 
 ## Installation
 
@@ -42,8 +42,11 @@ The following requirements must be met:
 To launch the application, perform the following steps:
 
 1. clone repository
-2. run `docker compose up --build` in the root directory of the project
-3. close the application with `CTRL + C`
+2. duplicate the `.env.example` file and rename it to `.env` (Bash-Befehl: `cp .env.example
+   .env`)
+3. fill in the missing values in the `.env` file
+4. run `docker compose up --build` in the root directory of the project
+5. close the application with `CTRL + C`
 
 ## Contributing
 
