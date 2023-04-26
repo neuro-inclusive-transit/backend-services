@@ -2,6 +2,8 @@ import mqtt from "mqtt";
 import _mariadb from "mariadb";
 import { Application } from "oak";
 
+const apiKey = "...";
+
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
 
@@ -32,6 +34,7 @@ mqtt_client.on("error", (error) => {
 
 const app = new Application();
 
+// Request an Here-Transit-API
 async function logData(origin, destination, arrivalTime, apiKey) {
   const response = await fetch(
     "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey +
@@ -42,13 +45,18 @@ async function logData(origin, destination, arrivalTime, apiKey) {
 }
 
 app.use(async (ctx) => {
+  // Header aus Get-Request ablesen
+  let origin = ctx.request.headers.get("origin");
+  let destination = ctx.request.headers.get("destination");
+  let arrivalTime = ctx.request.headers.get("arrivalTime");
+
   let output = await logData(
-    "50.93755194938538,6.9500175525390695",
-    "51.022743,7.5618187",
-    "2023-06-24T14:00:00",
-    "APIKEY",
+    origin,
+    destination,
+    arrivalTime,
+    apiKey,
   );
-  console.log(output);
+
   ctx.response.body = output;
 });
 
