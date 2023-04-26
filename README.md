@@ -42,8 +42,8 @@ The following requirements must be met:
 To launch the application, perform the following steps:
 
 1. clone repository
-2. duplicate the `.env.example` file and rename it to `.env` (Bash-Befehl: `cp .env.example
-   .env`)
+2. duplicate the `.env.example` file and rename it to `.env` (Bash-Befehl:
+   `cp .env.example .env`)
 3. fill in the missing values in the `.env` file
 4. run `docker compose up --build` in the root directory of the project
 5. close the application with `CTRL + C`
