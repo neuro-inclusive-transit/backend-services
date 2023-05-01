@@ -35,11 +35,60 @@ mqtt_client.on("error", (error) => {
 const app = new Application();
 
 // Request an Here-Transit-API
-async function getRoute(origin, destination, arrivalTime, apiKey) {
+async function getRoute(
+  origin,
+  destination,
+  arrivalTime,
+  departureTime,
+  lang,
+  units,
+  changes,
+  alternatives,
+  modes,
+  pedestrianSpeed,
+  apiKey,
+) {
+  let anfrage = "https://transit.router.hereapi.com/v8/routes";
+  //?apiKey=" + apiKey + "&origin=" + origin + "&arrivalTime=" + arrivalTime + "&destination=" + destination;
+
+  if (apiKey != null) {
+    anfrage += "?apiKey=" + apiKey;
+  }
+  if (origin != null) {
+    anfrage += "&origin=" + origin;
+  }
+  if (arrivalTime != null) {
+    anfrage += "&arrivalTime=" + arrivalTime;
+  }
+  if (destination != null) {
+    anfrage += "&destination=" + destination;
+  }
+  if (departureTime != null) {
+    anfrage += "&departureTime=" + departureTime;
+  }
+  if (lang != null) {
+    anfrage += "&lang=" + lang;
+  }
+  if (units != null) {
+    anfrage += "&units=" + units;
+  }
+  if (changes != null) {
+    anfrage += "&changes=" + changes;
+  }
+  if (alternatives != null) {
+    anfrage += "&alternatives=" + alternatives;
+  }
+  if (modes != null) {
+    anfrage += "&modes=" + modes;
+  }
+  if (pedestrianSpeed != null) {
+    anfrage += "&pedestrianSpeed=" + pedestrianSpeed;
+  }
+
+  console.log(anfrage);
+
   const response = await fetch(
-    "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey +
-      "&origin=" + origin + "&destination=" + destination + "&arrivalTime=" +
-      arrivalTime,
+    anfrage,
   );
   return await response.json();
 }
@@ -49,11 +98,25 @@ app.use(async (ctx) => {
   const origin = ctx.request.headers.get("origin");
   const destination = ctx.request.headers.get("destination");
   const arrivalTime = ctx.request.headers.get("arrivalTime");
+  const departureTime = ctx.request.headers.get("departureTime");
+  const lang = ctx.request.headers.get("lang");
+  const units = ctx.request.headers.get("units");
+  const changes = ctx.request.headers.get("changes");
+  const alternatives = ctx.request.headers.get("alternatives");
+  const modes = ctx.request.headers.get("modes");
+  const pedestrianSpeed = ctx.request.headers.get("pedestrianSpeed");
 
   const route = await getRoute(
     origin,
     destination,
     arrivalTime,
+    departureTime,
+    lang,
+    units,
+    changes,
+    alternatives,
+    modes,
+    pedestrianSpeed,
     hereTransitAPIKey,
   );
   ctx.response.body = route;
