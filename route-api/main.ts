@@ -49,7 +49,28 @@ async function getRoute(
   apiKey,
 ) {
   let anfrage = "https://transit.router.hereapi.com/v8/routes";
-  //?apiKey=" + apiKey + "&origin=" + origin + "&arrivalTime=" + arrivalTime + "&destination=" + destination;
+
+  console.log(arguments);
+
+  /* Versuch, den Code zu verkürzen, indem die Parameter in einer for-Schleife abgearbeitet werden
+
+  // Aktuelles Problem: Die Namen der Variablen sind über arguments[i] nicht abrufbar, weil es sich um ein Array handelt und dort die Variablennamen verloren gehen
+  // Abrufen des Namens einer Variablen: Object.keys({ variable })[0];
+
+
+  for (let i = 0; i < arguments.length; i++) {
+    let option = arguments[i];
+    let name =
+
+    if (name == "apiKey" && apiKey != null) {
+      anfrage += "?" + Object.keys({ name })[0] + "=" + option;
+    }
+
+    if (name != "apiKey" && option != null) {
+      anfrage += "&" + Object.keys({ name })[0] + "=" + option;
+    }
+  }
+  */
 
   if (apiKey != null) {
     anfrage += "?apiKey=" + apiKey;
@@ -84,8 +105,6 @@ async function getRoute(
   if (pedestrianSpeed != null) {
     anfrage += "&pedestrianSpeed=" + pedestrianSpeed;
   }
-
-  console.log(anfrage);
 
   const response = await fetch(
     anfrage,
