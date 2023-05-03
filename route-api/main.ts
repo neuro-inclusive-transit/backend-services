@@ -1,6 +1,6 @@
 import mqtt from "mqtt";
 import _mariadb from "mariadb";
-import { Application } from "oak";
+import { Application } from "oak/mod.ts";
 
 const HERE_TRANSIT_API_KEY = Deno.env.get("HERE_TRANSIT_API");
 
@@ -32,25 +32,24 @@ mqtt_client.on("error", (error) => {
   console.log(error);
 });
 
+type GetRouteOptions = {
+  origin: string;
+  destination: string;
+  arrivalTime?: string;
+  departureTime?: string;
+  lang?: string;
+  units?: string;
+  changes?: number;
+  alternatives?: number;
+  modes?: string[];
+  pedestrianSpeed?: number;
+};
+
 const app = new Application();
 
 // Request an Here-Transit-API
-async function getRoute(
-  origin,
-  destination,
-  arrivalTime,
-  departureTime,
-  lang,
-  units,
-  changes,
-  alternatives,
-  modes,
-  pedestrianSpeed,
-  apiKey,
-) {
+async function getRoute(options: GetRouteOptions, apiKey: string) {
   let anfrage = "https://transit.router.hereapi.com/v8/routes";
-
-  console.log(arguments);
 
   /* Versuch, den Code zu verkürzen, indem die Parameter in einer for-Schleife abgearbeitet werden
 
@@ -75,36 +74,38 @@ async function getRoute(
   if (apiKey != null) {
     anfrage += "?apiKey=" + apiKey;
   }
-  if (origin != null) {
-    anfrage += "&origin=" + origin;
+  if (options.origin != null) {
+    anfrage += "&origin=" + options.origin;
   }
-  if (arrivalTime != null) {
-    anfrage += "&arrivalTime=" + arrivalTime;
+  if (options.arrivalTime != null) {
+    anfrage += "&arrivalTime=" + options.arrivalTime;
   }
-  if (destination != null) {
-    anfrage += "&destination=" + destination;
+  if (options.destination != null) {
+    anfrage += "&destination=" + options.destination;
   }
-  if (departureTime != null) {
-    anfrage += "&departureTime=" + departureTime;
+  if (options.departureTime != null) {
+    anfrage += "&departureTime=" + options.departureTime;
   }
-  if (lang != null) {
-    anfrage += "&lang=" + lang;
+  if (options.lang != null) {
+    anfrage += "&lang=" + options.lang;
   }
-  if (units != null) {
-    anfrage += "&units=" + units;
+  if (options.units != null) {
+    anfrage += "&units=" + options.units;
   }
-  if (changes != null) {
-    anfrage += "&changes=" + changes;
+  if (options.changes != null) {
+    anfrage += "&changes=" + options.changes;
   }
-  if (alternatives != null) {
-    anfrage += "&alternatives=" + alternatives;
+  if (options.alternatives != null) {
+    anfrage += "&alternatives=" + options.alternatives;
   }
-  if (modes != null) {
-    anfrage += "&modes=" + modes;
+  if (options.modes != null) {
+    anfrage += "&modes=" + options.modes;
   }
-  if (pedestrianSpeed != null) {
-    anfrage += "&pedestrianSpeed=" + pedestrianSpeed;
+  if (options.pedestrianSpeed != null) {
+    anfrage += "&pedestrianSpeed=" + options.pedestrianSpeed;
   }
+
+  console.log(anfrage);
 
   const response = await fetch(
     anfrage,
@@ -114,29 +115,22 @@ async function getRoute(
 
 app.use(async (ctx) => {
   // Header aus Get-Request ablesen
-  const origin = ctx.request.headers.get("origin");
-  const destination = ctx.request.headers.get("destination");
-  const arrivalTime = ctx.request.headers.get("arrivalTime");
-  const departureTime = ctx.request.headers.get("departureTime");
-  const lang = ctx.request.headers.get("lang");
-  const units = ctx.request.headers.get("units");
-  const changes = ctx.request.headers.get("changes");
-  const alternatives = ctx.request.headers.get("alternatives");
-  const modes = ctx.request.headers.get("modes");
-  const pedestrianSpeed = ctx.request.headers.get("pedestrianSpeed");
+  const options: GetRouteOptions = {
+    origin: ctx.request.headers.get("origin"),
+    destination: ctx.request.headers.get("destination"),
+    arrivalTime: ctx.request.headers.get("arrivalTime"),
+    departureTime: ctx.request.headers.get("departureTime"),
+    lang: ctx.request.headers.get("lang"),
+    units: ctx.request.headers.get("units"),
+    changes: ctx.request.headers.get("changes"),
+    alternatives: ctx.request.headers.get("alternatives"),
+    modes: ctx.request.headers.get("modes"),
+    pedestrianSpeed: ctx.request.headers.get("pedestrianSpeed"),
+  };
 
   const route = await getRoute(
-    origin,
-    destination,
-    arrivalTime,
-    departureTime,
-    lang,
-    units,
-    changes,
-    alternatives,
-    modes,
-    pedestrianSpeed,
-    hereTransitAPIKey,
+    options,
+    HERE_TRANSIT_API_KEY,
   );
   ctx.response.body = route;
 });
