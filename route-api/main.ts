@@ -2,7 +2,7 @@ import mqtt from "mqtt";
 import _mariadb from "mariadb";
 import { Application } from "oak";
 
-const hereTransitAPIKey = Deno.env.get("HERETRANSITAPI");
+const HERE_TRANSIT_API_KEY = Deno.env.get("HERE_TRANSIT_API");
 
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
