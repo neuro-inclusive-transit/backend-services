@@ -45,6 +45,7 @@ type GetRouteOptions = {
   alternatives?: number;
   modes?: string[];
   pedestrianSpeed?: number;
+  return?: string;
 };
 
 const app = new Application();
@@ -84,6 +85,7 @@ app.use(async (ctx) => {
     alternatives: ctx.request.headers.get("alternatives"),
     modes: ctx.request.headers.get("modes"),
     pedestrianSpeed: ctx.request.headers.get("pedestrianSpeed"),
+    return: ctx.request.headers.get("return"),
   };
 
   const route = await getRoute(
