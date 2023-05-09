@@ -75,24 +75,32 @@ app.use(async (ctx) => {
 
 await app.listen({ port: PORT });
 
-// Request an Here-Transit-API
 async function getRoute(options: GetRouteOptions, apiKey: string) {
+  const optionsAsString = changeObjectToString(options);
+  const url = generateURL(optionsAsString, apiKey);
+  const route = await sendRequest(url);
+  return route.json();
+}
+
+function changeObjectToString(object: GetRouteOptions) {
   //ToDo: Auseinanderklamüsern
-  const optionsAsString = Object.entries(options).filter(
+  return Object.entries(object).filter(
     ([_, value]) => value != null,
   ).map(([key, value]) => {
     return [key, `${value}`];
   });
+}
 
-  const params = new URLSearchParams(optionsAsString);
+function generateURL(options, apiKey: string) {
+  const params = new URLSearchParams(options);
 
   const url = new URL(
     "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey + "&" +
       params.toString(),
   );
+  return url;
+}
 
-  const response = await fetch(
-    url.href,
-  );
-  return await response.json();
+async function sendRequest(url: URL) {
+  return await fetch(url);
 }
