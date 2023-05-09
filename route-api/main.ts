@@ -50,28 +50,6 @@ type GetRouteOptions = {
 
 const app = new Application();
 
-// Request an Here-Transit-API
-async function getRoute(options: GetRouteOptions, apiKey: string) {
-  //ToDo: Auseinanderklamüsern
-  const optionsAsString = Object.entries(options).filter(
-    ([_, value]) => value != null,
-  ).map(([key, value]) => {
-    return [key, `${value}`];
-  });
-
-  const params = new URLSearchParams(optionsAsString);
-
-  const url = new URL(
-    "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey + "&" +
-      params.toString(),
-  );
-
-  const response = await fetch(
-    url.href,
-  );
-  return await response.json();
-}
-
 app.use(async (ctx) => {
   // Header aus Get-Request ablesen
   const options: GetRouteOptions = {
@@ -96,3 +74,25 @@ app.use(async (ctx) => {
 });
 
 await app.listen({ port: PORT });
+
+// Request an Here-Transit-API
+async function getRoute(options: GetRouteOptions, apiKey: string) {
+  //ToDo: Auseinanderklamüsern
+  const optionsAsString = Object.entries(options).filter(
+    ([_, value]) => value != null,
+  ).map(([key, value]) => {
+    return [key, `${value}`];
+  });
+
+  const params = new URLSearchParams(optionsAsString);
+
+  const url = new URL(
+    "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey + "&" +
+      params.toString(),
+  );
+
+  const response = await fetch(
+    url.href,
+  );
+  return await response.json();
+}
