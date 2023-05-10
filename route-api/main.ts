@@ -83,12 +83,13 @@ async function getRoute(options: GetRouteOptions, apiKey: string) {
 }
 
 function changeObjectToString(object: GetRouteOptions) {
-  //ToDo: Auseinanderklamüsern
-  return Object.entries(object).filter(
+  const objectWithoutNull = Object.entries(object).filter(
     ([_, value]) => value != null,
-  ).map(([key, value]) => {
+  );
+  const objectWithString = objectWithoutNull.map(([key, value]) => {
     return [key, `${value}`];
   });
+  return objectWithString;
 }
 
 function generateURL(options, apiKey: string) {
