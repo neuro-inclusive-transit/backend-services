@@ -66,20 +66,19 @@ app.use(async (ctx) => {
     return: ctx.request.headers.get("return"),
   };
 
-  const route = await getRoute(
-    options,
-    HERE_TRANSIT_API_KEY,
-  );
+  const hereRouteData = await getRouteData(options, HERE_TRANSIT_API_KEY);
 
-  ctx.response.body = route;
+  const responseData = aggregateData(hereRouteData);
+
+  ctx.response.body = responseData;
 });
 
 await app.listen({ port: PORT });
 
-async function getRoute(options: GetRouteOptions, apiKey: string) {
+async function getRouteData(options: GetRouteOptions, apiKey: string) {
   const optionsAsString = changeObjectToString(options);
   const url = generateURL(optionsAsString, apiKey);
-  const route = await sendRequest(url);
+  const route = await sendAPIRequest(url);
   return route.json();
 }
 
@@ -103,6 +102,14 @@ function generateURL(options, apiKey: string) {
   return url;
 }
 
-async function sendRequest(url: URL) {
+async function sendAPIRequest(url: URL) {
   return await fetch(url);
+}
+
+function aggregateData(hereRouteData: GetRouteOptions) {
+  // ToDo Daten mit anderen Infos aggregieren
+
+  const aggregatedData = hereRouteData;
+
+  return aggregatedData;
 }
