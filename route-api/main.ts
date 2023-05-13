@@ -43,7 +43,7 @@ type GetRouteOptions = {
   units?: string;
   changes?: number;
   alternatives?: number;
-  modes?: string[];
+  modes?: string;
   pedestrianSpeed?: number;
   return?: string;
 };
@@ -70,6 +70,7 @@ app.use(async (ctx) => {
     options,
     HERE_TRANSIT_API_KEY,
   );
+
   ctx.response.body = route;
 });
 
