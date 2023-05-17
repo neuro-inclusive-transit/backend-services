@@ -51,7 +51,22 @@ type GetRouteOptions = {
 const app = new Application();
 
 app.use(async (ctx) => {
-  // Header aus Get-Request ablesen
+  ctx.assert(
+    typeof ctx.request.headers.get("changes") !== "number",
+    400,
+    "Changes is not a number",
+  );
+  ctx.assert(
+    typeof ctx.request.headers.get("alternatives") !== "number",
+    400,
+    "Alternatives is not a number",
+  );
+  ctx.assert(
+    typeof ctx.request.headers.get("pedestrianSpeed") !== "number",
+    400,
+    "PedestrianSpeed is not a number",
+  );
+
   const options: GetRouteOptions = {
     origin: ctx.request.headers.get("origin"),
     destination: ctx.request.headers.get("destination"),
