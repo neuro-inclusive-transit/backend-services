@@ -17,6 +17,10 @@ async function loadEnvVariables(): Promise<Map<string, string>> {
 }
 // --- ---
 
+const envVariables = await loadEnvVariables();
+const DB_API_KEY = envVariables.get("DB_API_KEY")?.toString() || "noKey";
+const DB_CLIENT_ID = envVariables.get("DB_CLIENT_ID")?.toString() || "noKey";
+
 type Station = {
   name: string;
   evaNr: string | null;
@@ -48,10 +52,6 @@ if (stationDatafromDB && stationDatafromDB.result) {
 Deno.writeTextFile("./stationData.json", JSON.stringify(stations));
 
 async function getDBStationData() {
-  const envVariables = await loadEnvVariables();
-  const DB_API_KEY = envVariables.get("DB_API_KEY")?.toString() || "noKey";
-  const DB_CLIENT_ID = envVariables.get("DB_CLIENT_ID")?.toString() || "noKey";
-
   const response = await fetch(
     "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations",
     {
