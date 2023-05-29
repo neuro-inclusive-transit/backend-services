@@ -17,4 +17,7 @@ async function getStationData() {
   return data;
 }
 
-Deno.writeTextFile("./stationData.txt", JSON.stringify(await getStationData()));
+Deno.writeTextFile(
+  "./stationData.json",
+  JSON.stringify(await getStationData()),
+);
