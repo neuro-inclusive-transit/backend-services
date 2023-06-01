@@ -31,8 +31,6 @@ type Station = {
 const stationDatafromDB = await getDBStationData();
 const stations: Station[] = [];
 
-getHereID("Hamburg Hbf");
-
 if (stationDatafromDB && stationDatafromDB.result) {
   stationDatafromDB.result.forEach((station: any) => {
     if (
@@ -52,7 +50,7 @@ if (stationDatafromDB && stationDatafromDB.result) {
   console.error("Fehler beim Abrufen der Daten von der Datenbank");
 }
 
-Deno.writeTextFile("./stationData.json", JSON.stringify(stations));
+await Deno.writeTextFile("./stationData.json", JSON.stringify(stations));
 
 async function getDBStationData() {
   const response = await fetch(
@@ -72,7 +70,7 @@ async function getDBStationData() {
 
 /**
 
-Anmerkung: Das Abfragen der Here-ID ist bis auf weiteres pasuiert. Der AUfwand ist sehr groß, weil die API zusätzlich zum Namen auch Koordinaten benötigt
+Anmerkung: Das Abfragen der Here-ID ist bis auf weiteres pausiert. Der Aufwand ist sehr groß, weil die API zusätzlich zum Namen auch Koordinaten benötigt
 
 async function getHereID(stationName: string) {
   const response = await fetch(

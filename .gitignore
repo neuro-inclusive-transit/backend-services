@@ -104,4 +104,4 @@ broker/log/**
 !broker/log/.gitkeep
 
 ### LocalStorageFiles ###
-challenge-api/data/stationData.json
+disturbance-api/data/stationData.json
