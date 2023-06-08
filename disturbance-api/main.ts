@@ -120,28 +120,25 @@ async function getDBStationData() {
       },
     },
   );
-  const data = await response.json();
-  return data;
+  return await response.json();
 }
 
 async function getDBTimetableData(evaNr: string) {
-  const response = await fetch(
+  return await fetch(
     "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/fchg/" +
       evaNr,
     {
+      method: "GET",
       headers: {
         "DB-Api-Key": DB_API_KEY,
         "DB-Client-Id": DB_CLIENT_ID,
       },
     },
   );
-  return response;
 }
 
 async function parseTimetableData(data: any) {
-  const res = data;
-
-  const xml = create(await res.text()).end({ format: "object" });
+  const xml = create(await data.text()).end({ format: "object" });
   stats.MeldungenAnzahl = xml.timetable.s.length;
 
   const handleNachricht = (m, hideTime = false) => {
