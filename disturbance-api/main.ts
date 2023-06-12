@@ -67,7 +67,7 @@ async function getStationData() {
 
   stations.forEach(async (station) => {
     const timeTableData = await getDBTimetableData(station.evaNr);
-    parseTimetableData(timeTableData);
+    parseandpublishTimetableData(timeTableData);
   });
 }
 
@@ -121,7 +121,7 @@ async function getDBTimetableData(evaNr: string) {
   );
 }
 
-async function parseTimetableData(data: any) {
+async function parseandpublishTimetableData(data: any) {
   const xml = create(await data.text()).end({ format: "object" });
 
   xml.timetable.s.map((i) => {
