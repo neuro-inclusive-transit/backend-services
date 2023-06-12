@@ -87,14 +87,14 @@ async function getStationData() {
   });
 }
 
-async function minimizeData(stations: any): Promise<Station[]> {
+function minimizeData(stations: any) {
   const newstations: Station[] = [];
 
   if (stations && stations.result) {
     stations.result.forEach((station: any) => {
       if (
-        station.mailingAddress.zipcode.startsWith("50") ||
-        station.mailingAddress.zipcode.startsWith("51")
+        station.mailingAddress.zipcode.startsWith("50127") ||
+        station.mailingAddress.zipcode.startsWith("50127")
       ) {
         const tmp: Station = {
           name: station.name,
@@ -163,41 +163,6 @@ async function parseTimetableData(data: any) {
   const meldung = xml.timetable.s.map((i) => {
     let temp = "ID: " + i["@id"];
     const ardp = (j, typ) => {
-      if (typ == "Ankunft" && (j["@ct"] || j["@pt"])) {
-        stats.AnkunftszeitGeaendert = (stats.AnkunftszeitGeaendert || 0) + 1;
-      }
-      if (typ == "Abfahrt" && (j["@ct"] || j["@pt"])) {
-        stats
-          .AbfahrtszeitGeaendert = (stats.AbfahrtszeitGeaendert || 0) + 1;
-      }
-      if (j["@cp"] || j["@pp"]) {
-        stats.BahnsteigGeaendert = (stats.BahnsteigGeaendert || 0) + 1;
-      }
-      if (j["@cpth"] || j["@ppth"]) {
-        stats.RouteGeaendert = (stats.RouteGeaendert || 0) + 1;
-      }
-      if (j["@clt"]) stats.HaltEntfernt = (stats.HaltEntfernt || 0) + 1;
-      if (j["@cs"]) {
-        stats.AenderungsTyp[eventStatusTypes[j["@cs"]]] =
-          (stats.AenderungsTyp[eventStatusTypes[j["@cs"]]] || 0) + 1;
-      }
-
-      if (j["@ct"] && j["@pt"]) {
-        if (parseDate(j["@ct"], true) >= parseDate(j["@pt"], true)) {
-          stats.ZugSpaeter = (stats.ZugSpaeter || 0) + 1;
-          stats.ZugSpaeterUmMs = (stats.ZugSpaeterUmMs || 0) +
-            parseDate(j["@ct"], true) - parseDate(j["@pt"], true);
-          stats.ZugSpaeterUmH = 0;
-          stats.ZugSpaeterDurchschnittH = 0;
-        } else {
-          stats.ZugFrueher = (stats.ZugFrueher || 0) + 1;
-          stats.ZugFrueherUmMs = (stats.ZugFrueherUmMs || 0) +
-            parseDate(j["@pt"], true) - parseDate(j["@ct"], true);
-          stats.ZugFrueherUmH = 0;
-          stats.ZugFrueherDurchschnittH = 0;
-        }
-      }
-
       return (j["@l"] ? "Linie: " + j["@l"] : "") +
         (j["@ct"]
           ? (j["@l"] ? ", " : "") + "geänderte " + typ + "szeit: " +
@@ -212,6 +177,7 @@ async function parseTimetableData(data: any) {
         (j["@clt"] ? ", Halt entfernt um: " + parseDate(j["@clt"]) : "") +
         (j.m ? ", " + handleNachricht(j.m) : "");
     };
+
     if (i.ar) temp += "; Ankunft: " + ardp(i.ar, "Ankunft");
     if (i.dp) temp += "; Abfahrt: " + ardp(i.dp, "Abfahrt");
     if (i.tl) {
@@ -222,29 +188,12 @@ async function parseTimetableData(data: any) {
     return temp;
   }).join("\n");
 
-  console.log(meldung);
-
-  if (stats.ZugFrueherUmMs > 5000000) {
-    stats.ZugFrueherUmH = stats.ZugFrueherUmMs / 1000 / 60 / 60;
-    stats.ZugFrueherDurchschnittH = stats.ZugFrueherUmH / stats.ZugFrueher;
-  } else {
-    stats.ZugFrueherUmMin = stats.ZugFrueherUmMs / 1000 / 60;
-    stats.ZugFrueherDurchschnittMin = stats.ZugFrueherUmMin / stats.ZugFrueher;
-  }
-  if (stats.ZugSpaeterUmMs > 5000000) {
-    stats.ZugSpaeterUmH = stats.ZugSpaeterUmMs / 1000 / 60 / 60;
-    stats.ZugSpaeterDurchschnittH = stats.ZugSpaeterUmH / stats.ZugSpaeter;
-  } else {
-    stats.ZugSpaeterUmMin = stats.ZugSpaeterUmMs / 1000 / 60 / 60;
-    stats.ZugSpaeterDurchschnittMin = stats.ZugSpaeterUmMin / stats.ZugSpaeter;
-  }
-
   console.log(
     "Bahnhof: " + xml.timetable["@station"] + " (" + xml.timetable["@eva"] +
       ")" +
       (xml.timetable.m ? ", " + handleNachricht(xml.timetable.m, true) : ""),
   );
-  //console.log(stats);
+  console.log(meldung);
 }
 
 getStationData();
