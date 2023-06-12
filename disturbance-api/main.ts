@@ -135,8 +135,10 @@ async function parseTimetableData(data: any) {
         arrivalTime: parseDate(j["@pt"]),
         newarrivalTime: parseDate(j["@ct"]),
       };
-      console.log(Verspaetung);
-      publishVerspaetung(Verspaetung);
+      //console.log(Verspaetung);
+      if (
+        Verspaetung.linie != undefined && Verspaetung.newarrivalTime != null
+      ) publishVerspaetung(Verspaetung);
     };
     if (i.ar) temp += "; Ankunft: " + ardp(i.ar);
   });
@@ -146,6 +148,11 @@ async function publishVerspaetung(data: Verspaetung) {
   await client.publish(
     data.evaNr + "/" + data.linie,
     "newarrivalTime:" + data.newarrivalTime,
+  );
+
+  console.log(
+    data.evaNr + "/" + data.linie + ": " + "newarrivalTime: " +
+      data.newarrivalTime,
   );
 }
 
