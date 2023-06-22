@@ -1,5 +1,4 @@
 import mqtt from "mqtt";
-import { Application } from "oak/mod.ts";
 import { create } from "npm:xmlbuilder2";
 
 const DB_API_KEY = Deno.env.get("DB_API_KEY") || "noKey";
@@ -135,6 +134,15 @@ async function parseandpublishTimetableData(data: any) {
         arrivalTime: parseDate(j["@pt"]),
         newarrivalTime: parseDate(j["@ct"]),
       };
+      if (Verspaetung.linie != undefined && Verspaetung.linie.startsWith("S")) {
+        Verspaetung.linie = Verspaetung.linie.substring(1);
+      }
+
+      if (
+        Verspaetung.linie != undefined && Verspaetung.linie.startsWith("RB")
+      ) {
+        Verspaetung.linie = Verspaetung.linie.substring(2);
+      }
       if (
         Verspaetung.linie != undefined && Verspaetung.newarrivalTime != null
       ) publishVerspaetung(Verspaetung);
