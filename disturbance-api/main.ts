@@ -67,7 +67,6 @@ async function getStationData() {
 
   stations.forEach(async (station) => {
     const timeTableData = await getDBTimetableData(station.evaNr);
-    console.log(timeTableData);
     parseandpublishTimetableData(timeTableData);
   });
 }
