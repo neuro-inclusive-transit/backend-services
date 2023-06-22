@@ -21,8 +21,8 @@ client.on("connect", () => {
   });
 });
 
-client.on("message", (_, message) => {
-  console.log(message.toString());
+client.on("message", (topic, payload) => {
+  console.log(topic, payload.toString());
 });
 
 client.on("error", (error) => {
@@ -55,8 +55,8 @@ type Verspaetung = {
   evaNr: string;
   id: string;
   linie: string;
-  arrivalTime: string;
-  newarrivalTime: string;
+  arrivalTime: string | number | null;
+  newarrivalTime: string | number | null;
 };
 
 async function getStationData() {
@@ -67,6 +67,7 @@ async function getStationData() {
 
   stations.forEach(async (station) => {
     const timeTableData = await getDBTimetableData(station.evaNr);
+    console.log(timeTableData);
     parseandpublishTimetableData(timeTableData);
   });
 }
@@ -78,7 +79,7 @@ function minimizeData(stations: any) {
     stations.result.forEach((station: any) => {
       if (
         station.mailingAddress.zipcode.startsWith("50") ||
-        station.mailingAddress.zipcode.startsWith("50")
+        station.mailingAddress.zipcode.startsWith("51")
       ) {
         const tmp: Station = {
           name: station.name,
@@ -135,7 +136,6 @@ async function parseandpublishTimetableData(data: any) {
         arrivalTime: parseDate(j["@pt"]),
         newarrivalTime: parseDate(j["@ct"]),
       };
-      //console.log(Verspaetung);
       if (
         Verspaetung.linie != undefined && Verspaetung.newarrivalTime != null
       ) publishVerspaetung(Verspaetung);
@@ -145,15 +145,16 @@ async function parseandpublishTimetableData(data: any) {
 }
 
 async function publishVerspaetung(data: Verspaetung) {
+  subscribeEvaNr(data.evaNr);
+
   await client.publish(
     data.evaNr + "/" + data.linie,
     "newarrivalTime:" + data.newarrivalTime,
   );
+}
 
-  console.log(
-    data.evaNr + "/" + data.linie + ": " + "newarrivalTime: " +
-      data.newarrivalTime,
-  );
+async function subscribeEvaNr(evaNr: string) {
+  await client.subscribe(evaNr + "/#");
 }
 
 getStationData();
