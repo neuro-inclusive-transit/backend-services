@@ -58,11 +58,19 @@ type Verspaetung = {
   newarrivalTime: string | number | null;
 };
 
-async function getStationData() {
-  console.log("Start getting data");
-  const stationDatafromDB = await getDBStationData();
-  console.log("Got Data from DB");
-  const stations = await minimizeData(stationDatafromDB);
+console.log("Start getting data");
+const stationDatafromDB = await getDBStationData();
+console.log("Got Data from DB");
+const stations = await minimizeData(stationDatafromDB);
+
+getTimeTableDataandPublish(stations);
+setInterval(getTimeTableDataandPublish, 5 * 60 * 1000);
+
+function getTimeTableDataandPublish(stations: Station[]) {
+  stations.forEach(async (station) => {
+    const timeTableData = await getDBTimetableData(station.evaNr);
+    parseandpublishTimetableData(timeTableData);
+  });
 
   stations.forEach(async (station) => {
     const timeTableData = await getDBTimetableData(station.evaNr);
@@ -163,6 +171,3 @@ async function publishVerspaetung(data: Verspaetung) {
 async function subscribeEvaNr(evaNr: string) {
   await client.subscribe(evaNr + "/#");
 }
-
-getStationData();
-setInterval(getStationData, 5 * 60 * 1000);
