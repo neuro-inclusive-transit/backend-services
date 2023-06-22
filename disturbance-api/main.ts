@@ -64,7 +64,10 @@ console.log("Got Data from DB");
 const stations = await minimizeData(stationDatafromDB);
 
 getTimeTableDataandPublish(stations);
-setInterval(getTimeTableDataandPublish, 5 * 60 * 1000);
+
+setInterval(() => {
+  getTimeTableDataandPublish(stations);
+}, 5 * 60 * 1000);
 
 function getTimeTableDataandPublish(stations: Station[]) {
   stations.forEach(async (station) => {
