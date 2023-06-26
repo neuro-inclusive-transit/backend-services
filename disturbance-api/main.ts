@@ -1,5 +1,6 @@
 import mqtt from "mqtt";
 import { create } from "npm:xmlbuilder2";
+import { getDBStationData, getDBTimetableData } from "./getApiData.ts";
 
 const DB_API_KEY = Deno.env.get("DB_API_KEY") || "noKey";
 const DB_CLIENT_ID = Deno.env.get("DB_CLIENT_ID") || "noKey";
@@ -59,7 +60,7 @@ type Delay = {
 };
 
 console.log("Start getting data");
-const stationDatafromDB = await getDBStationData();
+const stationDatafromDB = await getDBStationData(DB_API_KEY, DB_CLIENT_ID);
 console.log("Got Data from DB");
 const stations = await minimizeData(stationDatafromDB);
 
@@ -71,12 +72,20 @@ setInterval(() => {
 
 function getTimeTableDataAndPublish(stations: Station[]) {
   stations.forEach(async (station) => {
-    const timeTableData = await getDBTimetableData(station.evaNr);
+    const timeTableData = await getDBTimetableData(
+      DB_API_KEY,
+      DB_CLIENT_ID,
+      station.evaNr,
+    );
     parseandpublishTimetableData(timeTableData);
   });
 
   stations.forEach(async (station) => {
-    const timeTableData = await getDBTimetableData(station.evaNr);
+    const timeTableData = await getDBTimetableData(
+      DB_API_KEY,
+      DB_CLIENT_ID,
+      station.evaNr,
+    );
     parseandpublishTimetableData(timeTableData);
   });
 }
@@ -100,35 +109,6 @@ function minimizeData(stations: any) {
     });
   }
   return newstations;
-}
-
-async function getDBStationData() {
-  const response = await fetch(
-    "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations",
-    {
-      method: "GET",
-      headers: {
-        "DB-Api-Key": DB_API_KEY,
-        "DB-Client-Id": DB_CLIENT_ID,
-        accept: "application/json",
-      },
-    },
-  );
-  return await response.json();
-}
-
-async function getDBTimetableData(evaNr: string) {
-  return await fetch(
-    "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/fchg/" +
-      evaNr,
-    {
-      method: "GET",
-      headers: {
-        "DB-Api-Key": DB_API_KEY,
-        "DB-Client-Id": DB_CLIENT_ID,
-      },
-    },
-  );
 }
 
 async function parseandpublishTimetableData(data: any) {
