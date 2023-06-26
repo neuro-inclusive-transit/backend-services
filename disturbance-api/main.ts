@@ -50,7 +50,7 @@ type Station = {
   evaNr: string;
 };
 
-type Verspaetung = {
+type Delay = {
   evaNr: string;
   id: string;
   linie: string;
@@ -63,13 +63,13 @@ const stationDatafromDB = await getDBStationData();
 console.log("Got Data from DB");
 const stations = await minimizeData(stationDatafromDB);
 
-getTimeTableDataandPublish(stations);
+getTimeTableDataAndPublish(stations);
 
 setInterval(() => {
-  getTimeTableDataandPublish(stations);
+  getTimeTableDataAndPublish(stations);
 }, 5 * 60 * 1000);
 
-function getTimeTableDataandPublish(stations: Station[]) {
+function getTimeTableDataAndPublish(stations: Station[]) {
   stations.forEach(async (station) => {
     const timeTableData = await getDBTimetableData(station.evaNr);
     parseandpublishTimetableData(timeTableData);
@@ -138,31 +138,31 @@ async function parseandpublishTimetableData(data: any) {
     let temp = "ID: " + i["@id"];
 
     const ardp = (j) => {
-      const Verspaetung: Verspaetung = {
+      const delay: Delay = {
         linie: j["@l"],
         id: i["@id"],
         evaNr: xml.timetable["@eva"],
         arrivalTime: parseDate(j["@pt"]),
         newarrivalTime: parseDate(j["@ct"]),
       };
-      if (Verspaetung.linie != undefined && Verspaetung.linie.startsWith("S")) {
-        Verspaetung.linie = Verspaetung.linie.substring(1);
+      if (delay.linie != undefined && delay.linie.startsWith("S")) {
+        delay.linie = delay.linie.substring(1);
       }
 
       if (
-        Verspaetung.linie != undefined && Verspaetung.linie.startsWith("RB")
+        delay.linie != undefined && delay.linie.startsWith("RB")
       ) {
-        Verspaetung.linie = Verspaetung.linie.substring(2);
+        delay.linie = delay.linie.substring(2);
       }
       if (
-        Verspaetung.linie != undefined && Verspaetung.newarrivalTime != null
-      ) publishVerspaetung(Verspaetung);
+        delay.linie != undefined && delay.newarrivalTime != null
+      ) publishDelay(delay);
     };
     if (i.ar) temp += "; Ankunft: " + ardp(i.ar);
   });
 }
 
-async function publishVerspaetung(data: Verspaetung) {
+async function publishDelay(data: Delay) {
   subscribeEvaNr(data.evaNr);
 
   await client.publish(
