@@ -102,3 +102,6 @@ broker/data/**
 !broker/data/.gitkeep
 broker/log/**
 !broker/log/.gitkeep
+
+### LocalStorageFiles ###
+disturbance-api/data/stationData.json
