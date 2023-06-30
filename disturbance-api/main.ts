@@ -114,32 +114,35 @@ function minimizeData(stations: any) {
 async function parseandpublishTimetableData(data: any) {
   const xml = create(await data.text()).end({ format: "object" });
 
-  xml.timetable.s.map((i) => {
-    let temp = "ID: " + i["@id"];
+  try {
+    xml.timetable.s.map((i) => {
+      let temp = "ID: " + i["@id"];
 
-    const ardp = (j) => {
-      const delay: Delay = {
-        linie: j["@l"],
-        id: i["@id"],
-        evaNr: xml.timetable["@eva"],
-        arrivalTime: parseDate(j["@pt"]),
-        newarrivalTime: parseDate(j["@ct"]),
+      const ardp = (j) => {
+        const delay: Delay = {
+          linie: j["@l"],
+          id: i["@id"],
+          evaNr: xml.timetable["@eva"],
+          arrivalTime: parseDate(j["@pt"]),
+          newarrivalTime: parseDate(j["@ct"]),
+        };
+        if (delay.linie != undefined && delay.linie.startsWith("S")) {
+          delay.linie = delay.linie.substring(1);
+        }
+        if (
+          delay.linie != undefined && delay.linie.startsWith("RB")
+        ) {
+          delay.linie = delay.linie.substring(2);
+        }
+        if (
+          delay.linie != undefined && delay.newarrivalTime != null
+        ) publishDelay(delay);
       };
-      if (delay.linie != undefined && delay.linie.startsWith("S")) {
-        delay.linie = delay.linie.substring(1);
-      }
-
-      if (
-        delay.linie != undefined && delay.linie.startsWith("RB")
-      ) {
-        delay.linie = delay.linie.substring(2);
-      }
-      if (
-        delay.linie != undefined && delay.newarrivalTime != null
-      ) publishDelay(delay);
-    };
-    if (i.ar) temp += "; Ankunft: " + ardp(i.ar);
-  });
+      if (i.ar) temp += "; Ankunft: " + ardp(i.ar);
+    });
+  } catch {
+    console.error("Error parsing xml from timetablesAPI");
+  }
 }
 
 async function publishDelay(data: Delay) {
