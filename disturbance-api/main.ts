@@ -4,12 +4,9 @@ import { getDBStationData, getDBTimetableData } from "./getApiData.ts";
 
 const DB_API_KEY = Deno.env.get("DB_API_KEY") || "noKey";
 const DB_CLIENT_ID = Deno.env.get("DB_CLIENT_ID") || "noKey";
-const HERE_API_KEY = Deno.env.get("HERE_API_KEY") || "noKey";
 
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
-
-const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 3306;
 
 const client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
 
@@ -90,11 +87,11 @@ function getTimeTableDataAndPublish(stations: Station[]) {
   });
 }
 
-function minimizeData(stations: any) {
+function minimizeData(stations: unknown) {
   const newstations: Station[] = [];
 
   if (stations && stations.result) {
-    stations.result.forEach((station: any) => {
+    stations.result.forEach((station: unknown) => {
       if (
         station.mailingAddress.zipcode.startsWith("50") ||
         station.mailingAddress.zipcode.startsWith("51")
@@ -111,7 +108,7 @@ function minimizeData(stations: any) {
   return newstations;
 }
 
-async function parseandpublishTimetableData(data: any) {
+async function parseandpublishTimetableData(data: unknown) {
   const xml = create(await data.text()).end({ format: "object" });
 
   try {
