@@ -90,12 +90,27 @@ app.use(async (ctx) => {
 
 await app.listen({ port: PORT });
 
+/**
+ * Calls main functions for getting data from the HereAPI.
+ *
+ * @param apiKey The API key for the HereAPI.
+ * @param options The options for the Route.
+ * @return Route-data from the HereAPI.
+ */
+
 async function getRouteData(options: GetRouteOptions, apiKey: string) {
   const optionsAsString = changeObjectToString(options);
   const url = generateURL(optionsAsString, apiKey);
   const route = await sendAPIRequest(url);
   return route.json();
 }
+
+/**
+ * Takes GetRouteOptions and converts it to a string.
+ *
+ * @param object RouteOptions-Object for the Route.
+ * @return GetRouteOptions as a string.
+ */
 
 function changeObjectToString(object: GetRouteOptions) {
   const objectWithoutNull = Object.entries(object).filter(
@@ -107,7 +122,14 @@ function changeObjectToString(object: GetRouteOptions) {
   return objectWithString;
 }
 
-function generateURL(options, apiKey: string) {
+/**
+ * Generates the URL for the HereAPI.
+ *
+ * @param options The options for the Route as a string.
+ * @return URL for the HereAPI.
+ */
+
+function generateURL(options: string, apiKey: string) {
   const params = new URLSearchParams(options);
 
   const url = new URL(
@@ -122,7 +144,7 @@ async function sendAPIRequest(url: URL) {
 }
 
 function aggregateData(hereRouteData: GetRouteOptions) {
-  // ToDo Daten mit anderen Infos aggregieren
+  // TODO: Daten mit anderen Infos aggregieren
 
   const aggregatedData = hereRouteData;
 

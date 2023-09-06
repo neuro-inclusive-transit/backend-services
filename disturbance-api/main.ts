@@ -67,6 +67,12 @@ setInterval(() => {
   getTimeTableDataAndPublish(stations);
 }, 5 * 60 * 1000);
 
+/**
+ * Calls function for requesting data from the API and publishing it to the broker.
+ *
+ * @param stations Array of stations to request data from.
+ */
+
 function getTimeTableDataAndPublish(stations: Station[]) {
   stations.forEach(async (station) => {
     const timeTableData = await getDBTimetableData(
@@ -76,16 +82,14 @@ function getTimeTableDataAndPublish(stations: Station[]) {
     );
     parseandpublishTimetableData(timeTableData);
   });
-
-  stations.forEach(async (station) => {
-    const timeTableData = await getDBTimetableData(
-      DB_API_KEY,
-      DB_CLIENT_ID,
-      station.evaNr,
-    );
-    parseandpublishTimetableData(timeTableData);
-  });
 }
+
+/**
+ * Minimalizes number of station to reduce data.
+ *
+ * @param stations Array of stations to reduce.
+ * @return Array with reduced stations.
+ */
 
 function minimizeData(stations: unknown) {
   const newstations: Station[] = [];
@@ -107,6 +111,14 @@ function minimizeData(stations: unknown) {
   }
   return newstations;
 }
+
+/**
+ * Parses the xml from the timetableAPI and publishes the data to the broker.
+ * Parts of this function are taken from:
+ * https://gist.github.com/DEVTomatoCake/e18d870381f22c17bf25d738510c8d1c
+ *
+ * @param data Data from the timetableAPI.
+ */
 
 async function parseandpublishTimetableData(data: unknown) {
   const xml = create(await data.text()).end({ format: "object" });
@@ -142,6 +154,12 @@ async function parseandpublishTimetableData(data: unknown) {
   }
 }
 
+/**
+ * Publish delay of a train to the broker.
+ *
+ * @param data Delay of a train.
+ */
+
 async function publishDelay(data: Delay) {
   subscribeEvaNr(data.evaNr);
 
@@ -150,6 +168,12 @@ async function publishDelay(data: Delay) {
     "newarrivalTime:" + data.newarrivalTime,
   );
 }
+
+/**
+ * Subscribes to a Stations for better debugging.
+ *
+ * @param evaNr The evaNr of the station to subscribe to.
+ */
 
 async function subscribeEvaNr(evaNr: string) {
   await client.subscribe(evaNr + "/#");
