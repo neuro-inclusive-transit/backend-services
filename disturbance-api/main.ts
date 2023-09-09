@@ -15,6 +15,7 @@ const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 80;
 const client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
 
 const router = new Router();
+
 router.get("/stations", (ctx: Context) => {
   const station = ctx.request.url.searchParams.get("station");
   ctx.assert(typeof station === "string", Status.BadRequest);
@@ -165,14 +166,8 @@ async function parseandpublishTimetableData(data: unknown) {
 }
 
 async function publishDelay(data: Delay) {
-  subscribeEvaNr(data.evaNr);
-
   await client.publish(
     data.evaNr + "/" + data.linie,
     "newarrivalTime:" + data.newarrivalTime,
   );
-}
-
-async function subscribeEvaNr(evaNr: string) {
-  await client.subscribe(evaNr + "/#");
 }
