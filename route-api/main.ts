@@ -160,41 +160,49 @@ app.use(async (ctx: Context) => {
   const pedestrianSpeed = ctx.request.headers.get("pedestrianSpeed");
   const returnData = ctx.request.headers.get("return");
 
-  console.log(origin);
-  console.log(destination);
-  console.log(arrivalTime);
-  console.log(departureTime);
-  console.log(lang);
-  console.log(units);
-  console.log(changes);
-  console.log(alternatives);
-  console.log(modes);
-  console.log(pedestrianSpeed);
-  console.log(returnData);
+  console.log("Origin " + origin);
+  console.log("Destination " + destination);
+  console.log("ArrivalTime " + arrivalTime);
+  console.log("DepartureTime " + departureTime);
+  console.log("Lang " + lang);
+  console.log("Units " + units);
+  console.log("Changes " + changes);
+  console.log("Alternatives " + alternatives);
+  console.log("Modes " + modes);
+  console.log("PedestrianSpeed " + pedestrianSpeed);
+  console.log("Return " + returnData);
 
-  ctx.assert(origin !== null);
-  ctx.assert(destination !== null);
-  ctx.assert(arrivalTime !== null || departureTime !== null);
-  ctx.assert(lang !== null);
-  ctx.assert(units !== null);
-  ctx.assert(changes !== null);
-  ctx.assert(alternatives !== null);
-  ctx.assert(modes !== null);
-  ctx.assert(pedestrianSpeed !== null);
-  ctx.assert(returnData !== null);
+  ctx.assert(origin !== null, 400, "Origin is wrong");
+  ctx.assert(destination !== null, 400, "Destination is wrong");
+  ctx.assert(
+    arrivalTime !== null || departureTime !== null,
+    400,
+    "ArrivalTime or DepartureTime is wrong",
+  );
+  ctx.assert(lang !== undefined, 400, "Language is wrong");
+  ctx.assert(units !== undefined, 400, "Units is wrong");
+  ctx.assert(changes !== undefined, 400, "Changes is wrong");
+  ctx.assert(alternatives !== undefined, 400, "Alternatives is wrong");
+  ctx.assert(modes !== undefined, 400, "Modes is wrong");
+  ctx.assert(pedestrianSpeed !== undefined, 400, "PedestrianSpeed is wrong");
+  ctx.assert(returnData !== undefined, 400, "Return is wrong");
 
   const options: GetRouteOptions = {
     origin,
     destination,
     arrivalTime: arrivalTime === null ? undefined : arrivalTime,
     departureTime: departureTime === null ? undefined : departureTime,
-    lang,
-    units,
-    changes: parseInt(changes, 10),
-    alternatives: parseInt(alternatives, 10),
-    modes,
-    pedestrianSpeed: parseInt(pedestrianSpeed, 10),
-    return: returnData,
+    lang: lang === null ? undefined : lang,
+    units: units === null ? undefined : units,
+    changes: changes === null ? undefined : parseInt(changes, 10),
+    alternatives: alternatives === null
+      ? undefined
+      : parseInt(alternatives, 10),
+    modes: modes === null ? undefined : modes,
+    pedestrianSpeed: pedestrianSpeed === null
+      ? undefined
+      : parseInt(pedestrianSpeed, 10),
+    return: returnData === null ? undefined : returnData,
   };
 
   const hereRouteData: HereApiRoute = await getRouteData(
@@ -202,9 +210,9 @@ app.use(async (ctx: Context) => {
     HERE_TRANSIT_API_KEY,
   );
 
-  const responseData: HereApiRoute = aggregateData(hereRouteData); // Aggregated typ
+  //const responseData: HereApiRoute = aggregateData(hereRouteData); // Aggregated typ
 
-  ctx.response.body = responseData;
+  ctx.response.body = hereRouteData;
 });
 
 await app.listen({ port: PORT });
