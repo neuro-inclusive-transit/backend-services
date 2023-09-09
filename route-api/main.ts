@@ -210,9 +210,9 @@ app.use(async (ctx: Context) => {
     HERE_TRANSIT_API_KEY,
   );
 
-  //const responseData: HereApiRoute = aggregateData(hereRouteData); // Aggregated typ
+  const responseData: HereApiRoute = aggregateData(hereRouteData); // Aggregated typ
 
-  ctx.response.body = hereRouteData;
+  ctx.response.body = responseData;
 });
 
 await app.listen({ port: PORT });
@@ -251,15 +251,19 @@ async function sendAPIRequest(url: URL) {
 function aggregateData(hereRouteData: HereApiRoute) {
   const aggregatedData = hereRouteData;
 
-  aggregatedData.sections.forEach(async (element) => {
-    if (element.departure.place.type === "station") {
-      if (element.departure.place.name !== undefined) {
-        const response = await sendAPIRequest(
-          generateDisturbanceApiURL(element.departure.place.name),
-        );
-        element.departure.place.evaNr = response.json().evaNr;
+  aggregatedData.routes.forEach((element) => {
+    element.sections.forEach(async (section) => {
+      if (section.departure.place.type === "station") {
+        if (section.departure.place.name !== undefined) {
+          let tmp = generateDisturbanceApiURL(section.departure.place.name);
+          console.log(tmp);
+          const response = await fetch(
+            generateDisturbanceApiURL(section.departure.place.name),
+          );
+          console.log(response);
+        }
       }
-    }
+    });
   });
 
   return aggregatedData;
@@ -269,5 +273,6 @@ function generateDisturbanceApiURL(station: string) {
   const url = new URL(
     "http://localhost:3001/stations?station=" + station,
   );
+
   return url;
 }

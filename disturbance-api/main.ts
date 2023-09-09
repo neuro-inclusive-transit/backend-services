@@ -18,6 +18,7 @@ const router = new Router();
 
 router.get("/stations", (ctx: Context) => {
   const station = ctx.request.url.searchParams.get("station");
+  console.log(station);
   ctx.assert(typeof station === "string", Status.BadRequest);
 
   const stationData = stations.find((dataset) => dataset.name === station);
