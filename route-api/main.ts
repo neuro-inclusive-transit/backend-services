@@ -47,7 +47,7 @@ type Place = {
   id?: string;
   name?: string;
   type: string;
-  evaNr?: string;
+  evaNr?: string | null;
   location: LatLng;
 };
 
@@ -257,14 +257,30 @@ function aggregateData(hereRouteData: HereApiRouteData) {
   const aggregatedData = hereRouteData;
 
   aggregatedData.routes.forEach((element) => {
-    element.sections.forEach(async (section) => {
+    element.sections.forEach((section) => {
       if (section.departure.place.type === "station") {
         if (section.departure.place.name !== undefined) {
-          const response = await fetch(
-            generateDisturbanceApiURL(section.departure.place.name),
-          );
-          console.log(response.statusText);
+          let stationame: string = section.departure.place.name;
+          stationame = stationame.replace("Bf", "");
+
+          fetch(generateDisturbanceApiURL(stationame))
+            .then(function (response) {
+              // The response is a Response instance.
+              // You parse the data into a useable format using `.json()`
+              if (response.status === 200) {
+                return response.json();
+              }
+            }).then(function (data) {
+              console.log(data);
+              if (data !== undefined) {
+                section.departure.place.evaNr = data.evaNr;
+              } else {
+                section.departure.place.evaNr = null;
+              }
+            });
         }
+      } else {
+        section.departure.place.evaNr = null;
       }
     });
   });
