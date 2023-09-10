@@ -10,6 +10,9 @@ const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 3306;
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
 
+const DISTURBANCE_HOST = Deno.env.get("DISTURBANCE_HOST") || "localhost";
+const DISTURBANCE_PORT = Deno.env.get("DISTURBANCE_PORT") || "3001";
+
 const _DB_HOST = Deno.env.get("DB_HOST") || "localhost";
 const _DB_PORT = Deno.env.get("DB_PORT")
   ? parseInt(Deno.env.get("DB_PORT")!)
@@ -255,12 +258,10 @@ function aggregateData(hereRouteData: HereApiRoute) {
     element.sections.forEach(async (section) => {
       if (section.departure.place.type === "station") {
         if (section.departure.place.name !== undefined) {
-          let tmp = generateDisturbanceApiURL(section.departure.place.name);
-          console.log(tmp);
           const response = await fetch(
             generateDisturbanceApiURL(section.departure.place.name),
           );
-          console.log(response);
+          console.log(response.statusText);
         }
       }
     });
@@ -271,7 +272,8 @@ function aggregateData(hereRouteData: HereApiRoute) {
 
 function generateDisturbanceApiURL(station: string) {
   const url = new URL(
-    "http://localhost:3001/stations?station=" + station,
+    "http://" + DISTURBANCE_HOST + ":" + DISTURBANCE_PORT +
+      "/stations?station=" + station,
   );
 
   return url;
