@@ -94,46 +94,53 @@ export type HereApiTransportMode =
   | "pedestrian"
   | string;
 
-type HereApiRoute = {
-  id: string;
-  sections: Array<{
+type HereApiRouteData = {
+  routes: Array<{
     id: string;
-    type: string;
-    departure: TimeAndPlace;
-    arrival: TimeAndPlace;
-    summary?: {
-      duration: number;
-      length: number;
-    };
-    actions?: Array<{
-      action: string;
-      duration: number;
-      instruction: string;
-      direction?: string;
-      severity?: string;
-      offset?: number;
-      exit?: number;
-    }>;
-    polyline?: string;
-    spans?: Array<{
-      offset: number;
-      names: Array<{
-        value: string;
-        language: string;
-      }>;
-    }>;
-    transport: {
-      mode: HereApiTransportMode;
-      name?: string;
-      category?: string;
-      color?: string;
-      textColor?: string;
-      headsign?: string;
-      shortName?: string;
-    };
-    intermediateStops?: Array<{
+    sections: Array<{
+      id: string;
+      type: string;
       departure: TimeAndPlace;
-      duration?: number;
+      arrival: TimeAndPlace;
+      summary?: {
+        duration: number;
+        length: number;
+      };
+      actions?: Array<{
+        action: string;
+        duration: number;
+        instruction: string;
+        direction?: string;
+        severity?: string;
+        offset?: number;
+        exit?: number;
+      }>;
+      polyline?: string;
+      spans?: Array<{
+        offset: number;
+        names: Array<{
+          value: string;
+          language: string;
+        }>;
+      }>;
+      transport: {
+        mode: HereApiTransportMode;
+        name?: string;
+        category?: string;
+        color?: string;
+        textColor?: string;
+        headsign?: string;
+        shortName?: string;
+      };
+      intermediateStops?: Array<{
+        departure: TimeAndPlace;
+        duration?: number;
+      }>;
+      agency?: {
+        id: string;
+        name: string;
+        website: string;
+      };
     }>;
     agency?: {
       id: string;
@@ -141,11 +148,6 @@ type HereApiRoute = {
       website: string;
     };
   }>;
-  agency?: {
-    id: string;
-    name: string;
-    website: string;
-  };
 };
 
 const app = new Application();
@@ -208,12 +210,12 @@ app.use(async (ctx: Context) => {
     return: returnData === null ? undefined : returnData,
   };
 
-  const hereRouteData: HereApiRoute = await getRouteData(
+  const hereRouteData: HereApiRouteData = await getRouteData(
     options,
     HERE_TRANSIT_API_KEY,
   );
 
-  const responseData: HereApiRoute = aggregateData(hereRouteData); // Aggregated typ
+  const responseData: HereApiRouteData = aggregateData(hereRouteData); // Aggregated typ
 
   ctx.response.body = responseData;
 });
@@ -251,7 +253,7 @@ async function sendAPIRequest(url: URL) {
   return await fetch(url);
 }
 
-function aggregateData(hereRouteData: HereApiRoute) {
+function aggregateData(hereRouteData: HereApiRouteData) {
   const aggregatedData = hereRouteData;
 
   aggregatedData.routes.forEach((element) => {
