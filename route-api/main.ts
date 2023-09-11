@@ -265,18 +265,16 @@ function aggregateData(hereRouteData: HereApiRouteData) {
 
           fetch(generateDisturbanceApiURL(stationame))
             .then(function (response) {
-              // The response is a Response instance.
-              // You parse the data into a useable format using `.json()`
               if (response.status === 200) {
                 return response.json();
               }
             }).then(function (data) {
-              console.log(data);
               if (data !== undefined) {
                 section.departure.place.evaNr = data.evaNr;
               } else {
                 section.departure.place.evaNr = null;
               }
+              console.log(section.departure.place);
             });
         }
       } else {
