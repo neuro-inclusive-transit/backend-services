@@ -122,7 +122,7 @@ await app.listen({ port: PORT });
 async function getRouteData(options: GetRouteOptions, apiKey: string) {
   const optionsAsString = changeObjectToString(options);
   const url = generateHereApiURL(optionsAsString, apiKey);
-  const route = await sendAPIRequest(url);
+  const route = await fetch(url);
   return route.json();
 }
 
@@ -144,7 +144,7 @@ function changeObjectToString(object: GetRouteOptions) {
 }
 
 /**
- * Generates the URL for the HereAPI.
+ * Generates the URL for requesting the HereAPI.
  *
  * @param options The options for the Route as a string.
  * @return URL for the HereAPI.
@@ -160,9 +160,12 @@ function generateHereApiURL(options, apiKey?: string) {
   return url;
 }
 
-async function sendAPIRequest(url: URL) {
-  return await fetch(url);
-}
+/**
+ * Aggregate data from HereAPI with evaNr from DB
+ *
+ * @param hereRouteData The Route-data from the HereAPI.
+ * @return Aggregated Route-data with evaNr.
+ */
 
 async function aggregateData(hereRouteData: HereApiRouteData) {
   const aggregatedData = hereRouteData;
@@ -202,6 +205,13 @@ async function aggregateData(hereRouteData: HereApiRouteData) {
 
   return aggregatedData;
 }
+
+/**
+ * Generates the URL for requesting the DisturbanceAPI.
+ *
+ * @param station The station to request the evaNr from.
+ * @return URL for the DisturbanceAPI.
+ */
 
 function generateDisturbanceApiURL(station: string) {
   const url = new URL(
