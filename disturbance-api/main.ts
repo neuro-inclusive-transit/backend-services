@@ -1,5 +1,7 @@
 import mqtt from "mqtt";
 import { create } from "npm:xmlbuilder2";
+import { Application, Router, Status } from "oak/mod.ts";
+import type { Context } from "oak/mod.ts";
 import { getDBStationData, getDBTimetableData } from "./getApiData.ts";
 
 const DB_API_KEY = Deno.env.get("DB_API_KEY") || "noKey";
@@ -8,7 +10,29 @@ const DB_CLIENT_ID = Deno.env.get("DB_CLIENT_ID") || "noKey";
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
 
+const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 80;
+
 const client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
+
+const router = new Router();
+
+router.get("/stations", (ctx: Context) => {
+  const station = ctx.request.url.searchParams.get("station");
+  console.log(station);
+  ctx.assert(typeof station === "string", Status.BadRequest);
+
+  const stationData = stations.find((dataset) => dataset.name === station);
+
+  ctx.assert(stationData !== undefined, Status.NotFound);
+
+  ctx.response.body = stationData;
+});
+
+const app = new Application();
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+app.listen({ port: PORT });
 
 client.on("connect", () => {
   client.subscribe("presence", function (err) {
@@ -26,7 +50,7 @@ client.on("error", (error) => {
   console.log(error);
 });
 
-const parseDate = (str, raw = false) => {
+const parseDate = (str: string, raw = false) => {
   if (str == undefined) return null;
 
   const date = str.substr(0, 6);
@@ -161,20 +185,8 @@ async function parseandpublishTimetableData(data: unknown) {
  */
 
 async function publishDelay(data: Delay) {
-  subscribeEvaNr(data.evaNr);
-
   await client.publish(
     data.evaNr + "/" + data.linie,
     "newarrivalTime:" + data.newarrivalTime,
   );
-}
-
-/**
- * Subscribes to a Stations for better debugging.
- *
- * @param evaNr The evaNr of the station to subscribe to.
- */
-
-async function subscribeEvaNr(evaNr: string) {
-  await client.subscribe(evaNr + "/#");
 }

@@ -1,6 +1,7 @@
 import mqtt from "mqtt";
 import _mariadb from "mariadb";
-import { Application } from "oak/mod.ts";
+import { Application, Status } from "oak/mod.ts";
+import type { Context } from "oak/mod.ts";
 
 const HERE_TRANSIT_API_KEY = Deno.env.get("HERE_TRANSIT_API") || "nokey";
 
@@ -8,6 +9,9 @@ const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 3306;
 
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
+
+const DISTURBANCE_HOST = Deno.env.get("DISTURBANCE_HOST") || "localhost";
+const DISTURBANCE_PORT = Deno.env.get("DISTURBANCE_PORT") || "3001";
 
 const _DB_HOST = Deno.env.get("DB_HOST") || "localhost";
 const _DB_PORT = Deno.env.get("DB_PORT")
@@ -34,6 +38,25 @@ mqtt_client.on("error", (error) => {
   console.log(error);
 });
 
+type LatLng = {
+  lat: number;
+  lng: number;
+};
+
+type Place = {
+  id?: string;
+  name?: string;
+  type: string;
+  evaNr?: string | null;
+  location: LatLng;
+};
+
+type TimeAndPlace = {
+  time: string;
+  place: Place;
+  delay?: number;
+};
+
 type GetRouteOptions = {
   origin: string;
   destination: string;
@@ -48,42 +71,151 @@ type GetRouteOptions = {
   return?: string;
 };
 
+// @see https://developer.here.com/documentation/intermodal-routing/dev_guide/concepts/modes.html
+export type HereApiTransportMode =
+  | "highSpeedTrain"
+  | "intercityTrain"
+  | "interRegionalTrain"
+  | "regionalTrain"
+  | "cityTrain"
+  | "bus"
+  | "ferry"
+  | "subway"
+  | "lightRail"
+  | "privateBus"
+  | "inclined"
+  | "aerial"
+  | "busRapid"
+  | "monorail"
+  | "flight"
+  | "walk"
+  | "car"
+  | "bicycle"
+  | "pedestrian"
+  | string;
+
+type HereApiRouteData = {
+  routes: Array<{
+    id: string;
+    sections: Array<{
+      id: string;
+      type: string;
+      departure: TimeAndPlace;
+      arrival: TimeAndPlace;
+      summary?: {
+        duration: number;
+        length: number;
+      };
+      actions?: Array<{
+        action: string;
+        duration: number;
+        instruction: string;
+        direction?: string;
+        severity?: string;
+        offset?: number;
+        exit?: number;
+      }>;
+      polyline?: string;
+      spans?: Array<{
+        offset: number;
+        names: Array<{
+          value: string;
+          language: string;
+        }>;
+      }>;
+      transport: {
+        mode: HereApiTransportMode;
+        name?: string;
+        category?: string;
+        color?: string;
+        textColor?: string;
+        headsign?: string;
+        shortName?: string;
+      };
+      intermediateStops?: Array<{
+        departure: TimeAndPlace;
+        duration?: number;
+      }>;
+      agency?: {
+        id: string;
+        name: string;
+        website: string;
+      };
+    }>;
+    agency?: {
+      id: string;
+      name: string;
+      website: string;
+    };
+  }>;
+};
+
 const app = new Application();
 
-app.use(async (ctx) => {
+app.use(async (ctx: Context) => {
+  const origin = ctx.request.headers.get("origin");
+  const destination = ctx.request.headers.get("destination");
+  const arrivalTime = ctx.request.headers.get("arrivalTime");
+  const departureTime = ctx.request.headers.get("departureTime");
+  const lang = ctx.request.headers.get("lang");
+  const units = ctx.request.headers.get("units");
+  const changes = ctx.request.headers.get("changes");
+  const alternatives = ctx.request.headers.get("alternatives");
+  const modes = ctx.request.headers.get("modes");
+  const pedestrianSpeed = ctx.request.headers.get("pedestrianSpeed");
+  const returnData = ctx.request.headers.get("return");
+
+  console.log("Origin " + origin);
+  console.log("Destination " + destination);
+  console.log("ArrivalTime " + arrivalTime);
+  console.log("DepartureTime " + departureTime);
+  console.log("Lang " + lang);
+  console.log("Units " + units);
+  console.log("Changes " + changes);
+  console.log("Alternatives " + alternatives);
+  console.log("Modes " + modes);
+  console.log("PedestrianSpeed " + pedestrianSpeed);
+  console.log("Return " + returnData);
+
+  ctx.assert(origin !== null, 400, "Origin is wrong");
+  ctx.assert(destination !== null, 400, "Destination is wrong");
   ctx.assert(
-    typeof ctx.request.headers.get("changes") !== "number",
+    arrivalTime !== null || departureTime !== null,
     400,
-    "Changes is not a number",
+    "ArrivalTime or DepartureTime is wrong",
   );
-  ctx.assert(
-    typeof ctx.request.headers.get("alternatives") !== "number",
-    400,
-    "Alternatives is not a number",
-  );
-  ctx.assert(
-    typeof ctx.request.headers.get("pedestrianSpeed") !== "number",
-    400,
-    "PedestrianSpeed is not a number",
-  );
+  ctx.assert(lang !== undefined, 400, "Language is wrong");
+  ctx.assert(units !== undefined, 400, "Units is wrong");
+  ctx.assert(changes !== undefined, 400, "Changes is wrong");
+  ctx.assert(alternatives !== undefined, 400, "Alternatives is wrong");
+  ctx.assert(modes !== undefined, 400, "Modes is wrong");
+  ctx.assert(pedestrianSpeed !== undefined, 400, "PedestrianSpeed is wrong");
+  ctx.assert(returnData !== undefined, 400, "Return is wrong");
 
   const options: GetRouteOptions = {
-    origin: ctx.request.headers.get("origin"),
-    destination: ctx.request.headers.get("destination"),
-    arrivalTime: ctx.request.headers.get("arrivalTime"),
-    departureTime: ctx.request.headers.get("departureTime"),
-    lang: ctx.request.headers.get("lang"),
-    units: ctx.request.headers.get("units"),
-    changes: ctx.request.headers.get("changes"),
-    alternatives: ctx.request.headers.get("alternatives"),
-    modes: ctx.request.headers.get("modes"),
-    pedestrianSpeed: ctx.request.headers.get("pedestrianSpeed"),
-    return: ctx.request.headers.get("return"),
+    origin,
+    destination,
+    arrivalTime: arrivalTime === null ? undefined : arrivalTime,
+    departureTime: departureTime === null ? undefined : departureTime,
+    lang: lang === null ? undefined : lang,
+    units: units === null ? undefined : units,
+    changes: changes === null ? undefined : parseInt(changes, 10),
+    alternatives: alternatives === null
+      ? undefined
+      : parseInt(alternatives, 10),
+    modes: modes === null ? undefined : modes,
+    pedestrianSpeed: pedestrianSpeed === null
+      ? undefined
+      : parseInt(pedestrianSpeed, 10),
+    return: returnData === null ? undefined : returnData,
   };
 
-  const hereRouteData = await getRouteData(options, HERE_TRANSIT_API_KEY);
+  const hereRouteData: HereApiRouteData = await getRouteData(
+    options,
+    HERE_TRANSIT_API_KEY,
+  );
 
-  const responseData = aggregateData(hereRouteData);
+  const responseData: HereApiRouteData = aggregateData(hereRouteData); // Aggregated typ
 
   ctx.response.body = responseData;
 });
@@ -100,7 +232,7 @@ await app.listen({ port: PORT });
 
 async function getRouteData(options: GetRouteOptions, apiKey: string) {
   const optionsAsString = changeObjectToString(options);
-  const url = generateURL(optionsAsString, apiKey);
+  const url = generateHereApiURL(optionsAsString, apiKey);
   const route = await sendAPIRequest(url);
   return route.json();
 }
@@ -129,7 +261,7 @@ function changeObjectToString(object: GetRouteOptions) {
  * @return URL for the HereAPI.
  */
 
-function generateURL(options: string, apiKey: string) {
+function generateHereApiURL(options, apiKey?: string) {
   const params = new URLSearchParams(options);
 
   const url = new URL(
@@ -143,10 +275,50 @@ async function sendAPIRequest(url: URL) {
   return await fetch(url);
 }
 
-function aggregateData(hereRouteData: GetRouteOptions) {
-  // TODO: Daten mit anderen Infos aggregieren
-
+async function aggregateData(hereRouteData: HereApiRouteData) {
   const aggregatedData = hereRouteData;
 
+  await Promise.all(
+    aggregatedData.routes.map((element) => {
+      return element.sections.map((section) => {
+        if (section.departure.place.type === "station") {
+          if (section.departure.place.name !== undefined) {
+            let stationname: string = section.departure.place.name;
+            stationname = stationname.replace("Bf", "");
+
+            return fetch(generateDisturbanceApiURL(stationname))
+              .then(function (response) {
+                if (response.status === 200) {
+                  return response.json();
+                }
+              }).then(function (data) {
+                if (data !== undefined) {
+                  section.departure.place.evaNr = data.evaNr;
+                } else {
+                  section.departure.place.evaNr = null;
+                }
+                console.log("A" + section.departure.place.evaNr);
+              });
+          }
+        }
+      });
+    }).flat(),
+  );
+
+  aggregatedData.routes.forEach((element) => {
+    element.sections.forEach((section) => {
+      console.log("B" + section.departure.place.evaNr);
+    });
+  });
+
   return aggregatedData;
+}
+
+function generateDisturbanceApiURL(station: string) {
+  const url = new URL(
+    "http://" + DISTURBANCE_HOST + ":" + DISTURBANCE_PORT +
+      "/stations?station=" + station,
+  );
+
+  return url;
 }
