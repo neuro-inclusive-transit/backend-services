@@ -253,33 +253,39 @@ async function sendAPIRequest(url: URL) {
   return await fetch(url);
 }
 
-function aggregateData(hereRouteData: HereApiRouteData) {
+async function aggregateData(hereRouteData: HereApiRouteData) {
   const aggregatedData = hereRouteData;
+
+  await Promise.all(
+    aggregatedData.routes.map((element) => {
+      return element.sections.map((section) => {
+        if (section.departure.place.type === "station") {
+          if (section.departure.place.name !== undefined) {
+            let stationname: string = section.departure.place.name;
+            stationname = stationname.replace("Bf", "");
+
+            return fetch(generateDisturbanceApiURL(stationname))
+              .then(function (response) {
+                if (response.status === 200) {
+                  return response.json();
+                }
+              }).then(function (data) {
+                if (data !== undefined) {
+                  section.departure.place.evaNr = data.evaNr;
+                } else {
+                  section.departure.place.evaNr = null;
+                }
+                console.log("A" + section.departure.place.evaNr);
+              });
+          }
+        }
+      });
+    }).flat(),
+  );
 
   aggregatedData.routes.forEach((element) => {
     element.sections.forEach((section) => {
-      if (section.departure.place.type === "station") {
-        if (section.departure.place.name !== undefined) {
-          let stationame: string = section.departure.place.name;
-          stationame = stationame.replace("Bf", "");
-
-          fetch(generateDisturbanceApiURL(stationame))
-            .then(function (response) {
-              if (response.status === 200) {
-                return response.json();
-              }
-            }).then(function (data) {
-              if (data !== undefined) {
-                section.departure.place.evaNr = data.evaNr;
-              } else {
-                section.departure.place.evaNr = null;
-              }
-              console.log(section.departure.place);
-            });
-        }
-      } else {
-        section.departure.place.evaNr = null;
-      }
+      console.log("B" + section.departure.place.evaNr);
     });
   });
 
