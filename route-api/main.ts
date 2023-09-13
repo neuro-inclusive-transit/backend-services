@@ -1,8 +1,9 @@
 import mqtt from "mqtt";
 import _mariadb from "mariadb";
-import { Application, Status } from "oak/mod.ts";
+import { Application } from "oak/mod.ts";
 import type { Context } from "oak/mod.ts";
 import { GetRouteOptions, HereApiRouteData } from "./routes.ts";
+import { aggregateData } from "./aggregateData.ts";
 
 const HERE_TRANSIT_API_KEY = Deno.env.get("HERE_TRANSIT_API") || "nokey";
 
@@ -10,9 +11,6 @@ const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 3306;
 
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
-
-const DISTURBANCE_HOST = Deno.env.get("DISTURBANCE_HOST") || "localhost";
-const DISTURBANCE_PORT = Deno.env.get("DISTURBANCE_PORT") || "3001";
 
 const _DB_HOST = Deno.env.get("DB_HOST") || "localhost";
 const _DB_PORT = Deno.env.get("DB_PORT")
@@ -157,67 +155,5 @@ function generateHereApiURL(options, apiKey?: string) {
     "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey + "&" +
       params.toString(),
   );
-  return url;
-}
-
-/**
- * Aggregate data from HereAPI with evaNr from DB
- *
- * @param hereRouteData The Route-data from the HereAPI.
- * @return Aggregated Route-data with evaNr.
- */
-
-async function aggregateData(hereRouteData: HereApiRouteData) {
-  const aggregatedData = hereRouteData;
-
-  await Promise.all(
-    aggregatedData.routes.map((element) => {
-      return element.sections.map((section) => {
-        if (section.departure.place.type === "station") {
-          if (section.departure.place.name !== undefined) {
-            let stationname: string = section.departure.place.name;
-            stationname = stationname.replace("Bf", "");
-
-            return fetch(generateDisturbanceApiURL(stationname))
-              .then(function (response) {
-                if (response.status === 200) {
-                  return response.json();
-                }
-              }).then(function (data) {
-                if (data !== undefined) {
-                  section.departure.place.evaNr = data.evaNr;
-                } else {
-                  section.departure.place.evaNr = null;
-                }
-                console.log("A" + section.departure.place.evaNr);
-              });
-          }
-        }
-      });
-    }).flat(),
-  );
-
-  aggregatedData.routes.forEach((element) => {
-    element.sections.forEach((section) => {
-      console.log("B" + section.departure.place.evaNr);
-    });
-  });
-
-  return aggregatedData;
-}
-
-/**
- * Generates the URL for requesting the DisturbanceAPI.
- *
- * @param station The station to request the evaNr from.
- * @return URL for the DisturbanceAPI.
- */
-
-function generateDisturbanceApiURL(station: string) {
-  const url = new URL(
-    "http://" + DISTURBANCE_HOST + ":" + DISTURBANCE_PORT +
-      "/stations?station=" + station,
-  );
-
   return url;
 }
