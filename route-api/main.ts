@@ -215,7 +215,7 @@ app.use(async (ctx: Context) => {
     HERE_TRANSIT_API_KEY,
   );
 
-  const responseData: HereApiRouteData = aggregateData(hereRouteData); // Aggregated typ
+  const responseData: HereApiRouteData = await aggregateData(hereRouteData);
 
   ctx.response.body = responseData;
 });
