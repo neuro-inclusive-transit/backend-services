@@ -131,7 +131,7 @@ async function getRouteData(options: GetRouteOptions, apiKey: string) {
  * @return GetRouteOptions as a string.
  */
 
-function changeObjectToString(object: GetRouteOptions) {
+export function changeObjectToString(object: GetRouteOptions) {
   const objectWithoutNull = Object.entries(object).filter(
     ([_, value]) => value != null,
   );
@@ -148,7 +148,7 @@ function changeObjectToString(object: GetRouteOptions) {
  * @return URL for the HereAPI.
  */
 
-function generateHereApiURL(options, apiKey?: string) {
+export function generateHereApiURL(options: string[][], apiKey?: string) {
   const params = new URLSearchParams(options);
 
   const url = new URL(

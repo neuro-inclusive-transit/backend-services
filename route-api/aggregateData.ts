@@ -32,7 +32,7 @@ export async function aggregateData(hereRouteData: HereApiRouteData) {
                 } else {
                   section.departure.place.evaNr = null;
                 }
-                console.log("A" + section.departure.place.evaNr);
+                console.log("A " + section.departure.place.evaNr);
               });
           }
         }
@@ -42,7 +42,7 @@ export async function aggregateData(hereRouteData: HereApiRouteData) {
 
   aggregatedData.routes.forEach((element) => {
     element.sections.forEach((section) => {
-      console.log("B" + section.departure.place.evaNr);
+      console.log("B " + section.departure.place.evaNr);
     });
   });
 
@@ -56,7 +56,7 @@ export async function aggregateData(hereRouteData: HereApiRouteData) {
  * @return URL for the DisturbanceAPI.
  */
 
-function generateDisturbanceApiURL(station: string) {
+export function generateDisturbanceApiURL(station: string) {
   const url = new URL(
     "http://" + DISTURBANCE_HOST + ":" + DISTURBANCE_PORT +
       "/stations?station=" + station,
