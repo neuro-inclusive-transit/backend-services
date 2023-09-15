@@ -1,8 +1,8 @@
-import { assertEquals } from "assert";
+import { assertEquals } from "assert/mod.ts";
 
 import { generateDisturbanceApiURL } from "./aggregateData.ts";
-import { generateHereApiURL } from "./main.ts";
-import { changeObjectToString } from "./main.ts";
+import { generateHereApiURL } from "./getHereApiData.ts";
+import { changeObjectToString } from "./getHereApiData.ts";
 import { GetRouteOptions } from "./routes.ts";
 
 const DISTURBANCE_HOST = Deno.env.get("DISTURBANCE_HOST") || "localhost";
