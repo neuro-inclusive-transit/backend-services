@@ -11,8 +11,12 @@ import { GetRouteOptions } from "./routes.ts";
 export async function getRouteData(options: GetRouteOptions, apiKey: string) {
   const optionsAsString = changeObjectToString(options);
   const url = generateHereApiURL(optionsAsString, apiKey);
-  const route = await fetch(url);
-  return route.json();
+  try {
+    const route = await fetch(url);
+    return route.json();
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 /**
