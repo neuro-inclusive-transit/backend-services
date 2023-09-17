@@ -9,11 +9,11 @@ import { GetRouteOptions } from "./routes.ts";
  */
 
 export async function getRouteData(options: GetRouteOptions, apiKey: string) {
-  const optionsAsString = changeObjectToString(options);
-  const url = generateHereApiURL(optionsAsString, apiKey);
+  const OPTIONS_AS_STRING = changeObjectToString(options);
+  const URL = generateHereApiURL(OPTIONS_AS_STRING, apiKey);
   try {
-    const route = await fetch(url);
-    return route.json();
+    const ROUTE = await fetch(URL);
+    return ROUTE.json();
   } catch (error) {
     console.log(error);
   }
@@ -27,13 +27,13 @@ export async function getRouteData(options: GetRouteOptions, apiKey: string) {
  */
 
 export function changeObjectToString(object: GetRouteOptions) {
-  const objectWithoutNull = Object.entries(object).filter(
+  const OBJECT_WITHOUT_NULL = Object.entries(object).filter(
     ([_, value]) => value != null,
   );
-  const objectWithString = objectWithoutNull.map(([key, value]) => {
+  const OBJECT_WITH_STRING = OBJECT_WITHOUT_NULL.map(([key, value]) => {
     return [key, `${value}`];
   });
-  return objectWithString;
+  return OBJECT_WITH_STRING;
 }
 
 /**
@@ -44,11 +44,11 @@ export function changeObjectToString(object: GetRouteOptions) {
  */
 
 export function generateHereApiURL(options: string[][], apiKey?: string) {
-  const params = new URLSearchParams(options);
+  const PARAMS = new URLSearchParams(options);
 
-  const url = new URL(
+  const API_URL = new URL(
     "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey + "&" +
-      params.toString(),
+      PARAMS.toString(),
   );
-  return url;
+  return API_URL;
 }

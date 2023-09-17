@@ -11,7 +11,7 @@ export async function getDBStationData(
   DB_CLIENT_ID: string,
 ) {
   try {
-    const response = await fetch(
+    const RESPONSE = await fetch(
       "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations",
       {
         method: "GET",
@@ -22,7 +22,7 @@ export async function getDBStationData(
         },
       },
     );
-    return await response.json();
+    return await RESPONSE.json();
   } catch (error) {
     console.log(error);
   }
@@ -40,12 +40,12 @@ export async function getDBStationData(
 export async function getDBTimetableData(
   DB_API_KEY: string,
   DB_CLIENT_ID: string,
-  evaNr: string,
+  EVA_NR: string,
 ) {
   try {
     return await fetch(
       "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/fchg/" +
-        evaNr,
+        EVA_NR,
       {
         method: "GET",
         headers: {

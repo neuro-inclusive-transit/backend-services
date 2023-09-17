@@ -11,17 +11,17 @@ const DISTURBANCE_PORT = Deno.env.get("DISTURBANCE_PORT") || "3001";
  */
 
 export async function aggregateData(hereRouteData: HereApiRouteData) {
-  const aggregatedData = hereRouteData;
+  const AGGREGATED_DATA = hereRouteData;
 
   await Promise.all(
-    aggregatedData.routes.map((element) => {
+    AGGREGATED_DATA.routes.map((element) => {
       return element.sections.map((section) => {
         if (section.departure.place.type === "station") {
           if (section.departure.place.name !== undefined) {
-            let stationname: string = section.departure.place.name;
-            stationname = stationname.replace("Bf", "");
+            let stationName: string = section.departure.place.name;
+            stationName = stationName.replace("Bf", "");
 
-            return fetch(generateDisturbanceApiURL(stationname))
+            return fetch(generateDisturbanceApiURL(stationName))
               .then(function (response) {
                 if (response.status === 200) {
                   return response.json();
@@ -40,13 +40,13 @@ export async function aggregateData(hereRouteData: HereApiRouteData) {
     }).flat(),
   );
 
-  aggregatedData.routes.forEach((element) => {
+  AGGREGATED_DATA.routes.forEach((element) => {
     element.sections.forEach((section) => {
       console.log("B " + section.departure.place.evaNr);
     });
   });
 
-  return aggregatedData;
+  return AGGREGATED_DATA;
 }
 
 /**
@@ -57,10 +57,10 @@ export async function aggregateData(hereRouteData: HereApiRouteData) {
  */
 
 export function generateDisturbanceApiURL(station: string) {
-  const url = new URL(
+  const API_URL = new URL(
     "http://" + DISTURBANCE_HOST + ":" + DISTURBANCE_PORT +
       "/stations?station=" + station,
   );
 
-  return url;
+  return API_URL;
 }

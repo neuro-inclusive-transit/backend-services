@@ -20,27 +20,27 @@ const _DB_PORT = Deno.env.get("DB_PORT")
 const _DB_USER = Deno.env.get("DB_USER") || "root";
 const _DB_PASSWORD = Deno.env.get("DB_PASSWORD") || "root";
 
-const mqtt_client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
+const MQTT_CLIENT = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
 
-mqtt_client.on("connect", () => {
-  mqtt_client.subscribe("presence", function (err) {
+MQTT_CLIENT.on("connect", () => {
+  MQTT_CLIENT.subscribe("presence", function (err) {
     if (!err) {
-      mqtt_client.publish("presence", "Hello mqtt");
+      MQTT_CLIENT.publish("presence", "Hello mqtt");
     }
   });
 });
 
-mqtt_client.on("message", (_, message) => {
+MQTT_CLIENT.on("message", (_, message) => {
   console.log(message.toString());
 });
 
-mqtt_client.on("error", (error) => {
+MQTT_CLIENT.on("error", (error) => {
   console.log(error);
 });
 
-const app = new Application();
+const APP = new Application();
 
-app.use(async (ctx: Context) => {
+APP.use(async (ctx: Context) => {
   const origin = ctx.request.headers.get("origin");
   const destination = ctx.request.headers.get("destination");
   const arrivalTime = ctx.request.headers.get("arrivalTime");
@@ -98,14 +98,14 @@ app.use(async (ctx: Context) => {
     return: returnData === null ? undefined : returnData,
   };
 
-  const hereRouteData: HereApiRouteData = await getRouteData(
+  const HERE_ROUTEDATA: HereApiRouteData = await getRouteData(
     options,
     HERE_TRANSIT_API_KEY,
   );
 
-  const responseData: HereApiRouteData = await aggregateData(hereRouteData);
+  const RESPONSE_DATA: HereApiRouteData = await aggregateData(HERE_ROUTEDATA);
 
-  ctx.response.body = responseData;
+  ctx.response.body = RESPONSE_DATA;
 });
 
-await app.listen({ port: PORT });
+await APP.listen({ port: PORT });

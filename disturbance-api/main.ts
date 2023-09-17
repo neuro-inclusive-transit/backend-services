@@ -1,8 +1,8 @@
 import mqtt from "mqtt";
 import { create } from "npm:xmlbuilder2";
-import { Application, Router, Status } from "oak/mod.ts";
+import { APPlication, Router, Status } from "oak/mod.ts";
 import type { Context } from "oak/mod.ts";
-import { getDBStationData, getDBTimetableData } from "./getApiData.ts";
+import { getDBSTATION_DATA, getDBTimetableData } from "./getApiData.ts";
 
 const DB_API_KEY = Deno.env.get("DB_API_KEY") || "noKey";
 const DB_CLIENT_ID = Deno.env.get("DB_CLIENT_ID") || "noKey";
@@ -12,45 +12,45 @@ const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
 
 const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 80;
 
-const client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
+const CLIENT = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
 
-const router = new Router();
+const ROUTER = new Router();
 
-router.get("/stations", (ctx: Context) => {
-  const station = ctx.request.url.searchParams.get("station");
-  console.log(station);
-  ctx.assert(typeof station === "string", Status.BadRequest);
+ROUTER.get("/stations", (ctx: Context) => {
+  const STATION = ctx.request.url.searchParams.get("station");
+  console.log(STATION);
+  ctx.assert(typeof STATION === "string", Status.BadRequest);
 
-  const stationData = stations.find((dataset) => dataset.name === station);
+  const STATION_DATA = STATIONS.find((dataset) => dataset.name === STATION);
 
-  ctx.assert(stationData !== undefined, Status.NotFound);
+  ctx.assert(STATION_DATA !== undefined, Status.NotFound);
 
-  ctx.response.body = stationData;
+  ctx.response.body = STATION_DATA;
 });
 
-const app = new Application();
-app.use(router.routes());
-app.use(router.allowedMethods());
+const APP = new APPlication();
+APP.use(ROUTER.routes());
+APP.use(ROUTER.allowedMethods());
 
-app.listen({ port: PORT });
+APP.listen({ port: PORT });
 
-client.on("connect", () => {
-  client.subscribe("presence", function (err) {
+CLIENT.on("connect", () => {
+  CLIENT.subscribe("presence", function (err) {
     if (!err) {
-      client.publish("presence", "Hello mqtt");
+      CLIENT.publish("presence", "Hello mqtt");
     }
   });
 });
 
-client.on("message", (topic, payload) => {
+CLIENT.on("message", (topic, payload) => {
   console.log(topic, payload.toString());
 });
 
-client.on("error", (error) => {
+CLIENT.on("error", (error) => {
   console.log(error);
 });
 
-const parseDate = (str: string, raw = false) => {
+const PARSE_DATE = (str: string, raw = false) => {
   if (str == undefined) return null;
 
   const date = str.substr(0, 6);
@@ -72,7 +72,7 @@ type Station = {
   evaNr: string;
 };
 
-type Delay = {
+type DELAY = {
   evaNr: string;
   id: string;
   linie: string;
@@ -81,14 +81,14 @@ type Delay = {
 };
 
 console.log("Start getting data");
-const stationDatafromDB = await getDBStationData(DB_API_KEY, DB_CLIENT_ID);
+const STTAIONDATAFROMDB = await getDBSTATION_DATA(DB_API_KEY, DB_CLIENT_ID);
 console.log("Got Data from DB");
-const stations = await minimizeData(stationDatafromDB);
+const STATIONS = await minimizeData(STTAIONDATAFROMDB);
 
-getTimeTableDataAndPublish(stations);
+getTimeTableDataAndPublish(STATIONS);
 
 setInterval(() => {
-  getTimeTableDataAndPublish(stations);
+  getTimeTableDataAndPublish(STATIONS);
 }, 5 * 60 * 1000);
 
 /**
@@ -116,7 +116,7 @@ function getTimeTableDataAndPublish(stations: Station[]) {
  */
 
 function minimizeData(stations: unknown) {
-  const newstations: Station[] = [];
+  const NEWSTATIONS: Station[] = [];
 
   if (stations && stations.result) {
     stations.result.forEach((station: unknown) => {
@@ -129,11 +129,11 @@ function minimizeData(stations: unknown) {
           evaNr: station.evaNumbers[0]?.number || null,
         };
 
-        newstations.push(tmp);
+        NEWSTATIONS.push(tmp);
       }
     });
   }
-  return newstations;
+  return NEWSTATIONS;
 }
 
 /**
@@ -145,33 +145,33 @@ function minimizeData(stations: unknown) {
  */
 
 async function parseandpublishTimetableData(data: unknown) {
-  const xml = create(await data.text()).end({ format: "object" });
+  const XML = create(await data.text()).end({ format: "object" });
 
   try {
-    xml.timetable.s.map((i) => {
+    XML.timetable.s.map((i) => {
       let temp = "ID: " + i["@id"];
 
-      const ardp = (j) => {
-        const delay: Delay = {
+      const ARDP = (j) => {
+        const DELAY: DELAY = {
           linie: j["@l"],
           id: i["@id"],
-          evaNr: xml.timetable["@eva"],
-          arrivalTime: parseDate(j["@pt"]),
-          newarrivalTime: parseDate(j["@ct"]),
+          evaNr: XML.timetable["@eva"],
+          arrivalTime: PARSE_DATE(j["@pt"]),
+          newarrivalTime: PARSE_DATE(j["@ct"]),
         };
-        if (delay.linie != undefined && delay.linie.startsWith("S")) {
-          delay.linie = delay.linie.substring(1);
+        if (DELAY.linie != undefined && DELAY.linie.startsWith("S")) {
+          DELAY.linie = DELAY.linie.substring(1);
         }
         if (
-          delay.linie != undefined && delay.linie.startsWith("RB")
+          DELAY.linie != undefined && DELAY.linie.startsWith("RB")
         ) {
-          delay.linie = delay.linie.substring(2);
+          DELAY.linie = DELAY.linie.substring(2);
         }
         if (
-          delay.linie != undefined && delay.newarrivalTime != null
-        ) publishDelay(delay);
+          DELAY.linie != undefined && DELAY.newarrivalTime != null
+        ) publishDELAY(DELAY);
       };
-      if (i.ar) temp += "; Ankunft: " + ardp(i.ar);
+      if (i.ar) temp += "; Ankunft: " + ARDP(i.ar);
     });
   } catch {
     console.error("Error parsing xml from timetablesAPI");
@@ -179,13 +179,13 @@ async function parseandpublishTimetableData(data: unknown) {
 }
 
 /**
- * Publish delay of a train to the broker.
+ * Publish DELAY of a train to the broker.
  *
- * @param data Delay of a train.
+ * @param data DELAY of a train.
  */
 
-async function publishDelay(data: Delay) {
-  await client.publish(
+async function publishDELAY(data: DELAY) {
+  await CLIENT.publish(
     data.evaNr + "/" + data.linie,
     "newarrivalTime:" + data.newarrivalTime,
   );
