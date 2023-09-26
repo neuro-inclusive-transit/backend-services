@@ -81,9 +81,9 @@ type DELAY = {
 };
 
 console.log("Start getting data");
-const STTAIONDATAFROMDB = await getDBSTATION_DATA(DB_API_KEY, DB_CLIENT_ID);
+const STAION_DATA_FROM_DB = await getDBSTATION_DATA(DB_API_KEY, DB_CLIENT_ID);
 console.log("Got Data from DB");
-const STATIONS = await minimizeData(STTAIONDATAFROMDB);
+const STATIONS = await minimizeData(STAION_DATA_FROM_DB);
 
 getTimeTableDataAndPublish(STATIONS);
 

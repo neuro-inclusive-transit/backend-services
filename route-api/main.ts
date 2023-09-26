@@ -80,7 +80,7 @@ APP.use(async (ctx: Context) => {
   ctx.assert(pedestrianSpeed !== undefined, 400, "PedestrianSpeed is wrong");
   ctx.assert(returnData !== undefined, 400, "Return is wrong");
 
-  const options: GetRouteOptions = {
+  const OPTIONS: GetRouteOptions = {
     origin,
     destination,
     arrivalTime: arrivalTime === null ? undefined : arrivalTime,
@@ -99,7 +99,7 @@ APP.use(async (ctx: Context) => {
   };
 
   const HERE_ROUTEDATA: HereApiRouteData = await getRouteData(
-    options,
+    OPTIONS,
     HERE_TRANSIT_API_KEY,
   );
 
