@@ -1,4 +1,4 @@
-import { assertEquals } from "assert/mod.ts";
+import { assertEquals } from "std/assert/mod.ts";
 
 import { generateDisturbanceApiURL } from "./aggregateData.ts";
 import { generateHereApiURL } from "./getHereApiData.ts";
