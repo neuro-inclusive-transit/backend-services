@@ -11,7 +11,7 @@ COPY ./deno.json ./import_map.json ./
 ENV SERVICE_NAME=${SERVICE_NAME}
 
 RUN deno cache --unstable --import-map=import_map.json ./${SERVICE_NAME}/main.ts
-RUN deno test --unstable --allow-env ./${SERVICE_NAME}/test.ts
+RUN deno test --allow-env
 
 # run
 CMD deno run -A ./${SERVICE_NAME}/main.ts
