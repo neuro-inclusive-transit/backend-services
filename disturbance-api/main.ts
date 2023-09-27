@@ -1,8 +1,8 @@
 import mqtt from "mqtt";
 import { create } from "npm:xmlbuilder2";
-import { APPlication, Router, Status } from "oak/mod.ts";
+import { Application, Router, Status } from "oak/mod.ts";
 import type { Context } from "oak/mod.ts";
-import { getDBSTATION_DATA, getDBTimetableData } from "./getApiData.ts";
+import { getDBStationData, getDBTimetableData } from "./getApiData.ts";
 
 const DB_API_KEY = Deno.env.get("DB_API_KEY") || "noKey";
 const DB_CLIENT_ID = Deno.env.get("DB_CLIENT_ID") || "noKey";
@@ -28,7 +28,7 @@ ROUTER.get("/stations", (ctx: Context) => {
   ctx.response.body = STATION_DATA;
 });
 
-const APP = new APPlication();
+const APP = new Application();
 APP.use(ROUTER.routes());
 APP.use(ROUTER.allowedMethods());
 
@@ -81,7 +81,7 @@ type DELAY = {
 };
 
 console.log("Start getting data");
-const STAION_DATA_FROM_DB = await getDBSTATION_DATA(DB_API_KEY, DB_CLIENT_ID);
+const STAION_DATA_FROM_DB = await getDBStationData(DB_API_KEY, DB_CLIENT_ID);
 console.log("Got Data from DB");
 const STATIONS = await minimizeData(STAION_DATA_FROM_DB);
 
