@@ -116,11 +116,15 @@ jobs:
           token_format: 'access_token'
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
+      - run: |
+        BASE_IMAGE_NAME = ${{ env.BASE_IMAGE_NAME }}
+        echo "BASE_SERVICE_NAME=${BASE_IMAGE_NAME//\//_}" >> $GITHUB_ENV
+
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@e62f655d5754bec48078a72edc015367b01ee97b #v1.0.2
         with:
-          service: ${{ env.BASE_IMAGE_NAME }}-${{ matrix.images }}
+          service: ${{ env.BASE_SERVICE_NAME }}-${{ matrix.images }}
           region: ${{ env.REGION }}
           # NOTE: If using a pre-built image, update the image name here
           image: ${{ env.REGISTRY }}/${{ env.BASE_IMAGE_NAME }}-${{ matrix.images }}:${{ github.sha }}
