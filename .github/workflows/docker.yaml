@@ -123,6 +123,8 @@ jobs:
       - name: Make sure Google Artifact Repository exists
         run: |-
           if ! gcloud artifacts repositories list | grep -qE "^${{ env.BASE_SERVICE_NAME }}$"; then
+            echo "Repository already exists"
+          else
             gcloud artifacts repositories create ${{ env.BASE_SERVICE_NAME }} --repository-format=docker --location=${{ env.GAR_LOCATION }} --description="Docker images for ${{ env.BASE_SERVICE_NAME }}"
           fi
 
