@@ -142,7 +142,7 @@ jobs:
 
       - name: Generate Names for Images
         id: generate-names
-        run:
+        run: |-
           echo "GHCR_TAG=${{ env.LOCAL_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}-${{ matrix.images }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
           echo "GCR_TAG=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.BASE_SERVICE_NAME }}-${{ matrix.images }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
