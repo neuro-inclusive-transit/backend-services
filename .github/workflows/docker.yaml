@@ -116,8 +116,8 @@ jobs:
           token_format: 'access_token'
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-      - run: |
-          BASE_IMAGE_NAME = ${{ env.BASE_IMAGE_NAME }}
+      - name: Generate Service Name
+        run: |
           echo "BASE_SERVICE_NAME=${BASE_IMAGE_NAME//\//_}" >> $GITHUB_ENV
 
       - name: Deploy to Cloud Run
