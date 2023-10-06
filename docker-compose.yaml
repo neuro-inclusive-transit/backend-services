@@ -12,7 +12,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./challenge-api:/app/challenge-api
+      - ./challenge-api:/app/service
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
     networks:
@@ -49,7 +49,7 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - ./disturbance-api:/app/disturbance-api
+      - ./disturbance-api:/app/service
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
     networks:
@@ -86,7 +86,7 @@ services:
     ports:
       - "3002:3002"
     volumes:
-      - ./route-api:/app/route-api
+      - ./route-api:/app/service
       - ./deno.json:/app/deno.json
       - ./import_map.json:/app/import_map.json
     networks:
