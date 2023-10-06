@@ -182,12 +182,13 @@ jobs:
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@e62f655d5754bec48078a72edc015367b01ee97b #v1.0.2
-        env:
-          GCR_TAG: ${{ steps.generate-names.outputs.GCR_TAG }}
         with:
           service: ${{ env.BASE_SERVICE_NAME }}-${{ matrix.images }}
           region: ${{ env.REGION }}
           image: ${{ steps.generate-names.outputs.GCR_TAG }}
+          env_vars: |
+            SERVICE_NAME=${{ matrix.images }}
+
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
