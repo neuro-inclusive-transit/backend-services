@@ -36,6 +36,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - run: |
+          echo "BASE_SERVICE_NAME=${BASE_IMAGE_NAME//\//_}" >> $GITHUB_ENV
+      - run: |
+          echo $BASE_SERVICE_NAME
+
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
@@ -117,7 +122,6 @@ jobs:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       - run: |
-          BASE_IMAGE_NAME = ${{ env.BASE_IMAGE_NAME }}
           echo "BASE_SERVICE_NAME=${BASE_IMAGE_NAME//\//_}" >> $GITHUB_ENV
 
       - name: Deploy to Cloud Run
