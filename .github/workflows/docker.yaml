@@ -146,6 +146,10 @@ jobs:
           echo "GHCR_TAG=${{ env.LOCAL_REGISTRY }}/${{ env.BASE_IMAGE_NAME }}-${{ matrix.images }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
           echo "GCR_TAG=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.BASE_SERVICE_NAME }}-${{ matrix.images }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
+      - name: Make sure Google Artifact Repository exists
+        run: |-
+          gcloud artifacts repositories create ${{ env.BASE_SERVICE_NAME }}-${{ matrix.images }} --repository-format=docker --location=${{ env.GAR_LOCATION }} --description="Docker images for ${{ env.BASE_SERVICE_NAME }}-${{ matrix.images }}"
+
       - name: Tag and Push Docker image to Google Artifact Registry
         run: |-
           docker pull ${{ steps.generate-names.outputs.GHCR_TAG }}
