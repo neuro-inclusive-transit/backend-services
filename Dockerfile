@@ -5,8 +5,9 @@ ARG SERVICE_NAME
 WORKDIR /app
 
 # copy code of service
-COPY ./${SERVICE_NAME} ./service
 COPY ./deno.json ./import_map.json ./
+COPY ./common ./common
+COPY ./${SERVICE_NAME} ./service
 
 ENV SERVICE_NAME=${SERVICE_NAME}
 
