@@ -143,7 +143,6 @@ jobs:
     strategy:
       matrix:
         images:
-          - 'challenge-api'
           - 'disturbance-api'
           - 'route-api'
 
