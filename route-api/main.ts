@@ -12,15 +12,15 @@ const PORT = Deno.env.get("PORT") ? parseInt(Deno.env.get("PORT")!) : 3306;
 
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
+const BROKER_USERNAME = Deno.env.get("BROKER_USERNAME") || "";
+const BROKER_PASSWORD = Deno.env.get("BROKER_PASSWORD") || "";
 
-const _DB_HOST = Deno.env.get("DB_HOST") || "localhost";
-const _DB_PORT = Deno.env.get("DB_PORT")
-  ? parseInt(Deno.env.get("DB_PORT")!)
-  : 3306;
-const _DB_USER = Deno.env.get("DB_USER") || "root";
-const _DB_PASSWORD = Deno.env.get("DB_PASSWORD") || "root";
-
-const MQTT_CLIENT = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
+const MQTT_CLIENT = mqtt.connect({
+  host: BROKER_HOST,
+  port: BROKER_PORT,
+  password: BROKER_PASSWORD,
+  username: BROKER_USERNAME,
+});
 
 MQTT_CLIENT.on("connect", () => {
   MQTT_CLIENT.subscribe("presence", function (err) {

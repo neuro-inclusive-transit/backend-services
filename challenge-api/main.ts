@@ -2,8 +2,15 @@ import mqtt from "mqtt";
 
 const BROKER_HOST = Deno.env.get("BROKER_HOST") || "localhost";
 const BROKER_PORT = Deno.env.get("BROKER_PORT") || "1883";
+const BROKER_USERNAME = Deno.env.get("BROKER_USERNAME") || "";
+const BROKER_PASSWORD = Deno.env.get("BROKER_PASSWORD") || "";
 
-const CLIENT = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
+const CLIENT = mqtt.connect({
+  host: BROKER_HOST,
+  port: BROKER_PORT,
+  password: BROKER_PASSWORD,
+  username: BROKER_USERNAME,
+});
 
 CLIENT.on("connect", () => {
   CLIENT.subscribe("presence", function (err) {
