@@ -9,6 +9,8 @@ on:
   pull_request:
     branches: [ "main" ]
 
+concurrency: deployments
+
 env:
   BASE_IMAGE_NAME: ${{ github.repository }}
   LOCAL_REGISTRY: ghcr.io
