@@ -4,6 +4,8 @@ import { Application, Router, Status } from "oak/mod.ts";
 import type { Context } from "oak/mod.ts";
 import { getDBStationData, getDBTimetableData } from "./getApiData.ts";
 
+import status from "../common/status.ts";
+
 const DB_API_KEY = Deno.env.get("DB_API_KEY") || "noKey";
 const DB_CLIENT_ID = Deno.env.get("DB_CLIENT_ID") || "noKey";
 
@@ -22,6 +24,8 @@ const CLIENT = mqtt.connect({
 });
 
 const ROUTER = new Router();
+
+ROUTER.get("/status", status);
 
 ROUTER.get("/stations", (ctx: Context) => {
   const STATION = ctx.request.url.searchParams.get("station");

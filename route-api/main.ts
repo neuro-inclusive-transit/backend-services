@@ -1,10 +1,12 @@
 import mqtt from "mqtt";
 import _mariadb from "mariadb";
-import { Application } from "oak/mod.ts";
+import { Application, Router } from "oak/mod.ts";
 import type { Context } from "oak/mod.ts";
 import { GetRouteOptions, HereApiRouteData } from "./routes.ts";
 import { aggregateData } from "./aggregateData.ts";
 import { getRouteData } from "./getHereApiData.ts";
+
+import status from "../common/status.ts";
 
 const HERE_TRANSIT_API_KEY = Deno.env.get("HERE_TRANSIT_API") || "nokey";
 
@@ -40,7 +42,9 @@ MQTT_CLIENT.on("error", (error) => {
 
 const APP = new Application();
 
-APP.use(async (ctx: Context) => {
+const ROUTER = new Router();
+
+ROUTER.post("/", async (ctx: Context) => {
   const origin = ctx.request.headers.get("origin");
   const destination = ctx.request.headers.get("destination");
   const arrivalTime = ctx.request.headers.get("arrivalTime");
@@ -107,5 +111,10 @@ APP.use(async (ctx: Context) => {
 
   ctx.response.body = RESPONSE_DATA;
 });
+
+ROUTER.get("/status", status);
+
+APP.use(ROUTER.routes());
+APP.use(ROUTER.allowedMethods());
 
 await APP.listen({ port: PORT });
