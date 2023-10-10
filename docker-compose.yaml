@@ -96,6 +96,8 @@ services:
       - PORT=3002
       - BROKER_HOST=broker
       - BROKER_PORT=1883
+      - DISTURBANCE_HOST=disturbance-api
+      - DISTURBANCE_PORT=3001
       - DB_HOST=route-api-db
       - DB_PORT=3306
       - DB_USER=root

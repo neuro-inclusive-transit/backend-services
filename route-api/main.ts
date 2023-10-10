@@ -1,6 +1,10 @@
 import mqtt from "mqtt";
 import _mariadb from "mariadb";
 import { Application } from "oak/mod.ts";
+import type { Context } from "oak/mod.ts";
+import { GetRouteOptions, HereApiRouteData } from "./routes.ts";
+import { aggregateData } from "./aggregateData.ts";
+import { getRouteData } from "./getHereApiData.ts";
 
 const HERE_TRANSIT_API_KEY = Deno.env.get("HERE_TRANSIT_API") || "nokey";
 
@@ -16,115 +20,92 @@ const _DB_PORT = Deno.env.get("DB_PORT")
 const _DB_USER = Deno.env.get("DB_USER") || "root";
 const _DB_PASSWORD = Deno.env.get("DB_PASSWORD") || "root";
 
-const mqtt_client = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
+const MQTT_CLIENT = mqtt.connect(`mqtt://${BROKER_HOST}:${BROKER_PORT}`);
 
-mqtt_client.on("connect", () => {
-  mqtt_client.subscribe("presence", function (err) {
+MQTT_CLIENT.on("connect", () => {
+  MQTT_CLIENT.subscribe("presence", function (err) {
     if (!err) {
-      mqtt_client.publish("presence", "Hello mqtt");
+      MQTT_CLIENT.publish("presence", "Hello mqtt");
     }
   });
 });
 
-mqtt_client.on("message", (_, message) => {
+MQTT_CLIENT.on("message", (_, message) => {
   console.log(message.toString());
 });
 
-mqtt_client.on("error", (error) => {
+MQTT_CLIENT.on("error", (error) => {
   console.log(error);
 });
 
-type GetRouteOptions = {
-  origin: string;
-  destination: string;
-  arrivalTime?: string;
-  departureTime?: string;
-  lang?: string;
-  units?: string;
-  changes?: number;
-  alternatives?: number;
-  modes?: string;
-  pedestrianSpeed?: number;
-  return?: string;
-};
+const APP = new Application();
 
-const app = new Application();
+APP.use(async (ctx: Context) => {
+  const origin = ctx.request.headers.get("origin");
+  const destination = ctx.request.headers.get("destination");
+  const arrivalTime = ctx.request.headers.get("arrivalTime");
+  const departureTime = ctx.request.headers.get("departureTime");
+  const lang = ctx.request.headers.get("lang");
+  const units = ctx.request.headers.get("units");
+  const changes = ctx.request.headers.get("changes");
+  const alternatives = ctx.request.headers.get("alternatives");
+  const modes = ctx.request.headers.get("modes");
+  const pedestrianSpeed = ctx.request.headers.get("pedestrianSpeed");
+  const returnData = ctx.request.headers.get("return");
 
-app.use(async (ctx) => {
-  ctx.assert(
-    typeof ctx.request.headers.get("changes") !== "number",
-    400,
-    "Changes is not a number",
-  );
-  ctx.assert(
-    typeof ctx.request.headers.get("alternatives") !== "number",
-    400,
-    "Alternatives is not a number",
-  );
-  ctx.assert(
-    typeof ctx.request.headers.get("pedestrianSpeed") !== "number",
-    400,
-    "PedestrianSpeed is not a number",
-  );
+  console.log("Origin " + origin);
+  console.log("Destination " + destination);
+  console.log("ArrivalTime " + arrivalTime);
+  console.log("DepartureTime " + departureTime);
+  console.log("Lang " + lang);
+  console.log("Units " + units);
+  console.log("Changes " + changes);
+  console.log("Alternatives " + alternatives);
+  console.log("Modes " + modes);
+  console.log("PedestrianSpeed " + pedestrianSpeed);
+  console.log("Return " + returnData);
 
-  const options: GetRouteOptions = {
-    origin: ctx.request.headers.get("origin"),
-    destination: ctx.request.headers.get("destination"),
-    arrivalTime: ctx.request.headers.get("arrivalTime"),
-    departureTime: ctx.request.headers.get("departureTime"),
-    lang: ctx.request.headers.get("lang"),
-    units: ctx.request.headers.get("units"),
-    changes: ctx.request.headers.get("changes"),
-    alternatives: ctx.request.headers.get("alternatives"),
-    modes: ctx.request.headers.get("modes"),
-    pedestrianSpeed: ctx.request.headers.get("pedestrianSpeed"),
-    return: ctx.request.headers.get("return"),
+  ctx.assert(origin !== null, 400, "Origin is wrong");
+  ctx.assert(destination !== null, 400, "Destination is wrong");
+  ctx.assert(
+    arrivalTime !== null || departureTime !== null,
+    400,
+    "ArrivalTime or DepartureTime is wrong",
+  );
+  ctx.assert(lang !== undefined, 400, "Language is wrong");
+  ctx.assert(units !== undefined, 400, "Units is wrong");
+  ctx.assert(changes !== undefined, 400, "Changes is wrong");
+  ctx.assert(alternatives !== undefined, 400, "Alternatives is wrong");
+  ctx.assert(modes !== undefined, 400, "Modes is wrong");
+  ctx.assert(pedestrianSpeed !== undefined, 400, "PedestrianSpeed is wrong");
+  ctx.assert(returnData !== undefined, 400, "Return is wrong");
+
+  const OPTIONS: GetRouteOptions = {
+    origin,
+    destination,
+    arrivalTime: arrivalTime === null ? undefined : arrivalTime,
+    departureTime: departureTime === null ? undefined : departureTime,
+    lang: lang === null ? undefined : lang,
+    units: units === null ? undefined : units,
+    changes: changes === null ? undefined : parseInt(changes, 10),
+    alternatives: alternatives === null
+      ? undefined
+      : parseInt(alternatives, 10),
+    modes: modes === null ? undefined : modes,
+    pedestrianSpeed: pedestrianSpeed === null
+      ? undefined
+      : parseInt(pedestrianSpeed, 10),
+    return: returnData === null ? undefined : returnData,
   };
 
-  const hereRouteData = await getRouteData(options, HERE_TRANSIT_API_KEY);
+  const HERE_ROUTEDATA: HereApiRouteData = await getRouteData(
+    OPTIONS,
+    HERE_TRANSIT_API_KEY,
+  );
 
-  const responseData = aggregateData(hereRouteData);
+  const RESPONSE_DATA: HereApiRouteData = await aggregateData(HERE_ROUTEDATA);
 
-  ctx.response.body = responseData;
+  ctx.response.body = RESPONSE_DATA;
 });
 
-await app.listen({ port: PORT });
-
-async function getRouteData(options: GetRouteOptions, apiKey: string) {
-  const optionsAsString = changeObjectToString(options);
-  const url = generateURL(optionsAsString, apiKey);
-  const route = await sendAPIRequest(url);
-  return route.json();
-}
-
-function changeObjectToString(object: GetRouteOptions) {
-  const objectWithoutNull = Object.entries(object).filter(
-    ([_, value]) => value != null,
-  );
-  const objectWithString = objectWithoutNull.map(([key, value]) => {
-    return [key, `${value}`];
-  });
-  return objectWithString;
-}
-
-function generateURL(options, apiKey: string) {
-  const params = new URLSearchParams(options);
-
-  const url = new URL(
-    "https://transit.router.hereapi.com/v8/routes?apiKey=" + apiKey + "&" +
-      params.toString(),
-  );
-  return url;
-}
-
-async function sendAPIRequest(url: URL) {
-  return await fetch(url);
-}
-
-function aggregateData(hereRouteData: GetRouteOptions) {
-  // ToDo Daten mit anderen Infos aggregieren
-
-  const aggregatedData = hereRouteData;
-
-  return aggregatedData;
-}
+await APP.listen({ port: PORT });
