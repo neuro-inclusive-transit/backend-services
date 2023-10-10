@@ -3,7 +3,7 @@ name: Publish to ghcr and Google Cloud Run
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "m-feat-retag" ]
+    branches: [ "main" ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
