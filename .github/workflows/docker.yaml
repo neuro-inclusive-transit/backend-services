@@ -186,7 +186,7 @@ jobs:
 
       - name: Deploy to Cloud Run
         id: deploy
-        uses: google-github-actions/deploy-cloudrun@e62f655d5754bec48078a72edc015367b01ee97b #v1.0.2
+        uses: google-github-actions/deploy-cloudrun@b4a4335d697d5be41e5fa97dca581f479d4eb438 #v2.2.0
         with:
           service: ${{ env.BASE_SERVICE_NAME }}-${{ matrix.images }}
           region: ${{ env.REGION }}
