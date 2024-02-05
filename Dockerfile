@@ -1,4 +1,4 @@
-FROM denoland/deno:1.38.4
+FROM denoland/deno:1.40.3
 
 ARG SERVICE_NAME
 
