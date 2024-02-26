@@ -117,7 +117,7 @@ jobs:
 
       - name: Google Auth
         id: auth
-        uses: google-github-actions/auth@67e9c72af6e0492df856527b474995862b7b6591 #v2.0.0
+        uses: google-github-actions/auth@55bd3a7c6e2ae7cf1877fd1ccb9d54c0503c457c #v2.1.2
         with:
           token_format: 'access_token'
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
@@ -158,7 +158,7 @@ jobs:
 
       - name: Google Auth
         id: auth
-        uses: google-github-actions/auth@67e9c72af6e0492df856527b474995862b7b6591 #v2.0.0
+        uses: google-github-actions/auth@55bd3a7c6e2ae7cf1877fd1ccb9d54c0503c457c #v2.1.2
         with:
           token_format: 'access_token'
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
